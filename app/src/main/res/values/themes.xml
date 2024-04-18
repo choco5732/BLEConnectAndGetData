@@ -3,8 +3,6 @@
 
     <style name="Theme.Protocol20DataInfo" parent="Theme.AppCompat.DayNight.NoActionBar" />
 
-
-
     <style name="Theme.Protocol20DataInfo.SplashScreen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/uxn_logo_white</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
