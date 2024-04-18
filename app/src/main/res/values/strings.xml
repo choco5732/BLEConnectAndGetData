@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Protocol2.0DataInfo</string>
+    <string name="main_text1">BLE 탐색</string>
+</resources>
