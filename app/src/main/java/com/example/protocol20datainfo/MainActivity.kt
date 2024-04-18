@@ -79,15 +79,18 @@ class MainActivity : AppCompatActivity() {
                 device = result?.device
 
                 Log.d("choco5732", "scanning : ${device.toString()}")
+                Log.d("choco5732", "onScanResult")
             }
 
             override fun onBatchScanResults(results: MutableList<ScanResult>?) {
                 super.onBatchScanResults(results)
+                Log.d("choco5732", "onBatchScanResults")
             }
 
             override fun onScanFailed(errorCode: Int) {
                 super.onScanFailed(errorCode)
                 Log.d("choco5732", "errorCode : ${errorCode}")
+                Log.d("choco5732", "onScanFailed")
             }
         }
 
@@ -106,9 +109,19 @@ class MainActivity : AppCompatActivity() {
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.BLUETOOTH_SCAN),
+                1
+            )
+            bluetoothAdapter.getBluetoothLeScanner().startScan(callback)
+
             return
+        } else {
+            Log.d("choco5732", "권한 있고, startScan시작")
+            bluetoothAdapter.getBluetoothLeScanner().startScan(callback)
+
         }
-        bluetoothAdapter.getBluetoothLeScanner().startScan(callback)
 
 
 
