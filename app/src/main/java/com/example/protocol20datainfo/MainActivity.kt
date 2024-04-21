@@ -2,6 +2,7 @@ package com.example.protocol20datainfo
 
 import android.Manifest
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
@@ -20,12 +21,16 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import com.example.protocol20datainfo.databinding.MainActivityBinding
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.util.logging.Handler
 
@@ -38,13 +43,26 @@ class MainActivity : AppCompatActivity() {
     private val handler = android.os.Handler()
 
     // Stops scanning after 10 seconds.
-    private val SCAN_PERIOD: Long = 5000
+    private val SCAN_PERIOD: Long = 10000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this@MainActivity,
+                arrayOf(Manifest.permission.BLUETOOTH_SCAN),
+                1
+            )
+        }
 
         // 스플래쉬API 애니메이션 설정
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -117,97 +135,30 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+            scanLeDevice(callback,bluetoothAdapter.bluetoothLeScanner)
 
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.BLUETOOTH_SCAN
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-
-                Log.d("choco5732", "not grantted")
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-
-//                handler.postDelayed(
-//                    {
-//                        bluetoothAdapter.getBluetoothLeScanner().startScan(callback)
-//                        Toast.makeText(this, "스캔이 시작됩니다. 권한 없어서 얻고나서 실행", Toast.LENGTH_SHORT).show()
-//                    }, 100
-//                )
-
-                GlobalScope.launch {
-
-                    ActivityCompat.requestPermissions(
-                        this@MainActivity,
-                        arrayOf(Manifest.permission.BLUETOOTH_SCAN),
-                        1
-                    )
-                val after = GlobalScope.launch{
-                    bluetoothAdapter.bluetoothLeScanner.startScan(callback)
-                    Toast.makeText(this@MainActivity, "스캔이 시작됩니다. 권한 없어서 얻고나서 실행", Toast.LENGTH_SHORT).show()
-                }
-
-                after.join()
-
-                }
-
-
-
-
-
-
-
-
-
-
-            } else {
-                Log.d("choco5732", "권한 있고, startScan시작")
-                bluetoothAdapter.getBluetoothLeScanner().startScan(callback)
-                Toast.makeText(this, "스캔이 시작됩니다. 권한 있는 채로 실행", Toast.LENGTH_SHORT).show()
-
-            }
+//            bluetoothAdapter.getBluetoothLeScanner().startScan(callback)
+//            Toast.makeText(this, "스캔이 시작됩니다. ", Toast.LENGTH_SHORT).show()
 
         }
-
-
-
-
-
-
-
-
-
     }
 
 
-//    private fun scanLeDevice(callback: ScanCallback, scanner: BluetoothLeScanner) {
-//        if (!scanning) { // Stops scanning after a pre-defined scan period.
-//            handler.postDelayed({
-//                scanning = false
-//                scanner.stopScan(callback)
-//            }, SCAN_PERIOD)
-//            scanning = true
-//            scanner.startScan(callback)
-//        } else {
-//            scanning = false
-//            scanner.stopScan(callback)
-//        }
-//    }
-
-//    suspend fun test1 (){
-//        ActivityCompat.requestPermissions(
-//            this@MainActivity,
-//            arrayOf(Manifest.permission.BLUETOOTH_SCAN),
-//            1
-//        )
-//    }
-//    suspend fun test2 (bluetoothAdapter: BluetoothAdapter, callback: ScanCallback){
-//        bluetoothAdapter.bluetoothLeScanner.startScan(callback)
-//        Toast.makeText(this@MainActivity, "스캔이 시작됩니다. 권한 없어서 얻고나서 실행", Toast.LENGTH_SHORT).show()
-//    }
+    @SuppressLint("MissingPermission")
+    private fun scanLeDevice(callback: ScanCallback, scanner: BluetoothLeScanner) {
+        if (!scanning) { // Stops scanning after a pre-defined scan period.
+            handler.postDelayed({
+                scanning = false
+                scanner.stopScan(callback)
+                Toast.makeText(this, "스캔 종료 ", Toast.LENGTH_SHORT).show()
+            }, SCAN_PERIOD)
+            scanning = true
+            scanner.startScan(callback)
+            Toast.makeText(this, "스캔이 시작됩니다. ", Toast.LENGTH_SHORT).show()
+        } else {
+            scanning = false
+            scanner.stopScan(callback)
+            Toast.makeText(this, "스캔 종료 ", Toast.LENGTH_SHORT).show()
+        }
+    }
 }
