@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 
+        // 블투 스캔 권한 체크. 없으면 요구.
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.BLUETOOTH_SCAN
@@ -98,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         binding.mainBluetooth.setOnClickListener() {
 
             // 블루투스
-            // Bluetooth매니저 : 블루투스어댑터를 만들수 있다.
+            // Bluetooth매니저 : 블루투스 어댑터를 만들수 있다.
             val bleManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             // Bluetooth어댑터 : 장치검색,
             val bluetoothAdapter = bleManager.adapter
