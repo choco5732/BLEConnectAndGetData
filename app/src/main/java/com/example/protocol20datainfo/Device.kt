@@ -7,5 +7,4 @@ import kotlinx.parcelize.Parcelize
 data class Device(
     val deviceName : String? = null,
     val deviceMac : String? = null
-
 ) : Parcelable

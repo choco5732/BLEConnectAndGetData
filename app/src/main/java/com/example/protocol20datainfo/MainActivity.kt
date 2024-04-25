@@ -24,6 +24,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.protocol20datainfo.databinding.DeviceItemBinding
 import com.example.protocol20datainfo.databinding.MainActivityBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -45,11 +47,34 @@ class MainActivity : AppCompatActivity() {
     // Stops scanning after 10 seconds.
     private val SCAN_PERIOD: Long = 10000
 
+//    val binding2: DeviceItemBinding = DeviceItemBinding.inflate(layoutInflater)
+
+    private val deviceList = ArrayList<Device>()
+
+    private val deviceAdapter by lazy {
+        DeviceAdapter(
+            deviceList,
+            onClickItem = { position, item ->
+                Log.d("choco5732", "메인 액티비티 : 내 불렀능교!")
+            }
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+
+        deviceList.add(Device(deviceName = "아이폰14", deviceMac = "13:24:12:55"))
+        deviceList.add(Device(deviceName = "아이폰15", deviceMac = "13:24:12:55"))
+        deviceList.add(Device(deviceName = "AGMS", deviceMac = "16:DE:12:55"))
+        deviceList.add(Device(deviceName = "AGMS2", deviceMac = "16:DE:12:55"))
+
+
+        binding.deviceRecyclerView.adapter = deviceAdapter
+        binding.deviceRecyclerView.layoutManager = LinearLayoutManager(this)
 
 
         // 블투 스캔 권한 체크. 없으면 요구.
@@ -65,18 +90,18 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        // 스플래쉬API 애니메이션 설정
+        // 스플래쉬 API 애니메이션 설정
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             splashScreen.setOnExitAnimationListener { splashScreenView ->
                 // Create your custom animation.
                 val slideUp = ObjectAnimator.ofFloat(
                     splashScreenView,
-                    View.TRANSLATION_X,
+                    View.TRANSLATION_Y,
                     0f,
                     -splashScreenView.height.toFloat()
                 )
                 slideUp.interpolator = AnticipateInterpolator()
-                slideUp.duration = 200L
+                slideUp.duration = 600L
 
                 // Call SplashScreenView.remove at the end of your custom animation.
                 slideUp.doOnEnd { splashScreenView.remove() }
@@ -140,7 +165,6 @@ class MainActivity : AppCompatActivity() {
 
 //            bluetoothAdapter.getBluetoothLeScanner().startScan(callback)
 //            Toast.makeText(this, "스캔이 시작됩니다. ", Toast.LENGTH_SHORT).show()
-
         }
     }
 

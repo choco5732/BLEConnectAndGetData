@@ -1,43 +1,51 @@
 package com.example.protocol20datainfo
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.protocol20datainfo.databinding.DeviceItemBinding
 
 class DeviceAdapter(
-    private val onClickItem: (Int) -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>(
+    private val deviceList: ArrayList<Device>,
+    private val onClickItem: (Int, Device) -> Unit
+) : RecyclerView.Adapter<DeviceViewHolder>(
 ) {
 
-    var items = ArrayList<Device>()
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeviceViewHolder {
         return DeviceViewHolder(
             DeviceItemBinding.inflate(LayoutInflater.from(parent.context), parent, false),
             onClickItem
         )
     }
 
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = items[position]
+    override fun onBindViewHolder(holder: DeviceViewHolder, position: Int) {
+        val item = deviceList[position]
         holder.bind(item)
     }
+
+
     override fun getItemCount(): Int {
-        TODO("Not yet implemented")
+        return deviceList.size
     }
 
-    inner class DeviceViewHolder(
-        private val binding: DeviceItemBinding,
-        private val onClickItem: (Int) -> Unit
-    ) : RecyclerView.ViewHolder(binding.root) {
+}
+class DeviceViewHolder(
+    val binding: DeviceItemBinding,
+    private val onClickItem: (Int, Device) -> Unit
+) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(
-            item : Device
-        ) {
+    fun bind(item: Device) = with(binding) {
+        deviceName.setText((item.deviceName))
+        deviceMac.setText(item.deviceMac)
+        bluetoothImg.setImageResource(R.drawable.ic_bluetooth_blue)
 
+        binding.root.setOnClickListener {
+            onClickItem(
+                position,
+                item
+            )
+            Log.d("choco5732", "어댑터 : 리사이클러뷰 눌렀으예~?")
         }
-
-
     }
 }
