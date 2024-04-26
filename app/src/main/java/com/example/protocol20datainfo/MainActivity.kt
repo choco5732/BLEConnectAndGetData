@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 
 //    val binding2: DeviceItemBinding = DeviceItemBinding.inflate(layoutInflater)
 
-    private val deviceList = ArrayList<Device>()
+    private var deviceList = ArrayList<Device>()
 
     private val deviceAdapter by lazy {
         DeviceAdapter(
@@ -132,13 +132,33 @@ class MainActivity : AppCompatActivity() {
             val targetAddress = "60:C0:BF:ED:5E:DF"
 //        val device : BluetoothDevice = bluetoothAdapter.getRemoteDevice(targetAddress)
 
-            var device : BluetoothDevice? = null
+            var device: BluetoothDevice? = null
 
-            val callback : ScanCallback = object : ScanCallback() {
+            val callback: ScanCallback = object : ScanCallback() {
                 override fun onScanResult(callbackType: Int, result: ScanResult?) {
                     super.onScanResult(callbackType, result)
 
                     device = result?.device
+
+                    if (ActivityCompat.checkSelfPermission(
+                            this@MainActivity,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return
+                    }
+                    Log.d("choco5732", "device_name : ${device?.name}, device_mac : ${device?.address}")
+                    deviceList.add(Device(deviceName = device?.name , deviceMac = device?.address))
+
+
+
 
 //                if ( device?.address.toString() == targetAddress) {
 //                    Log.d("choco5732", "find it! mac is : ${device?.address}")
@@ -161,16 +181,37 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            scanLeDevice(callback,bluetoothAdapter.bluetoothLeScanner)
+            scanLeDevice(callback, bluetoothAdapter.bluetoothLeScanner)
 
-//            bluetoothAdapter.getBluetoothLeScanner().startScan(callback)
-//            Toast.makeText(this, "스캔이 시작됩니다. ", Toast.LENGTH_SHORT).show()
+            Log.d("choco5732", "not grantted")
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+
+//                handler.postDelayed(
+//                    {
+//                        bluetoothAdapter.getBluetoothLeScanner().startScan(callback)
+//                        Toast.makeText(this, "스캔이 시작됩니다. 권한 없어서 얻고나서 실행", Toast.LENGTH_SHORT).show()
+//                    }, 100
+//                )
+
+
+                    Toast.makeText(
+                        this@MainActivity,
+                        "스캔이 시작됩니다. 권한 없어서 얻고나서 실행",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
         }
     }
 
 
     @SuppressLint("MissingPermission")
-    private fun scanLeDevice(callback: ScanCallback, scanner: BluetoothLeScanner) {
+    fun scanLeDevice(callback: ScanCallback, scanner: BluetoothLeScanner) {
         if (!scanning) { // Stops scanning after a pre-defined scan period.
             handler.postDelayed({
                 scanning = false
