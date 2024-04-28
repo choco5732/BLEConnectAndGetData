@@ -29,6 +29,16 @@ class DeviceAdapter(
         return deviceList.size
     }
 
+    // 중복검사 및, 이름이 null아닌 디바이스만 추가
+    fun addDevice(item: Device) {
+
+        if(!deviceList.contains(item) && item.deviceName != ("null")) {
+            deviceList.add(item)
+            notifyItemInserted(deviceList.size - 1)
+        }
+    }
+
+
 }
 class DeviceViewHolder(
     val binding: DeviceItemBinding,
@@ -36,8 +46,8 @@ class DeviceViewHolder(
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(item: Device) = with(binding) {
-        deviceName.setText((item.deviceName))
-        deviceMac.setText(item.deviceMac)
+        deviceName.text = (item.deviceName)
+        deviceMac.text = item.deviceMac
         bluetoothImg.setImageResource(R.drawable.ic_bluetooth_blue)
 
         binding.root.setOnClickListener {
@@ -45,7 +55,6 @@ class DeviceViewHolder(
                 position,
                 item
             )
-            Log.d("choco5732", "어댑터 : 리사이클러뷰 눌렀으예~?")
         }
     }
 }

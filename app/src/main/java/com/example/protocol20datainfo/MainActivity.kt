@@ -2,9 +2,11 @@ package com.example.protocol20datainfo
 
 import android.Manifest
 import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
@@ -17,37 +19,23 @@ import android.util.Log
 import android.view.View
 import android.view.animation.AnticipateInterpolator
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.protocol20datainfo.databinding.DeviceItemBinding
+import com.airbnb.lottie.LottieAnimationView
 import com.example.protocol20datainfo.databinding.MainActivityBinding
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import java.util.logging.Handler
 
+@SuppressLint("MissingPermission")
 class MainActivity : AppCompatActivity() {
 
     lateinit var binding: MainActivityBinding
     private var isBlue = true // 초기 색은 파란색
 
     private var scanning = false
-    private val handler = android.os.Handler()
-
-    // Stops scanning after 10 seconds.
     private val SCAN_PERIOD: Long = 10000
-
-//    val binding2: DeviceItemBinding = DeviceItemBinding.inflate(layoutInflater)
+    private val handler = android.os.Handler()
 
     private val deviceList = ArrayList<Device>()
 
@@ -55,40 +43,99 @@ class MainActivity : AppCompatActivity() {
         DeviceAdapter(
             deviceList,
             onClickItem = { position, item ->
-                Log.d("choco5732", "메인 액티비티 : 내 불렀능교!")
+                Log.d("choco5732", "클릭한 장치 name : ${item.deviceName}, mac : ${item.deviceMac}")
+
+                item.device?.connectGatt(this, true, gattCallBack)
             }
         )
     }
 
+    private val gattCallBack = object : BluetoothGattCallback() {
+        override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
+            super.onConnectionStateChange(gatt, status, newState)
+
+
+        }
+
+        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
+            super.onServicesDiscovered(gatt, status)
+        }
+    }
+
+    private val permssions = arrayOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.BLUETOOTH_SCAN,
+        Manifest.permission.BLUETOOTH_CONNECT,
+        Manifest.permission.POST_NOTIFICATIONS,
+        Manifest.permission.SCHEDULE_EXACT_ALARM,
+        Manifest.permission.USE_EXACT_ALARM
+    )
+    private val permssionsFor29 = arrayOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen()
         binding = MainActivityBinding.inflate(layoutInflater)
+        installSplashScreen() // 꼭 binding.root 위에 있어야 한다. 명심!
         setContentView(binding.root)
 
+        initView()
+        initPermission()
 
-        deviceList.add(Device(deviceName = "아이폰14", deviceMac = "13:24:12:55"))
-        deviceList.add(Device(deviceName = "아이폰15", deviceMac = "13:24:12:55"))
-        deviceList.add(Device(deviceName = "AGMS", deviceMac = "16:DE:12:55"))
-        deviceList.add(Device(deviceName = "AGMS2", deviceMac = "16:DE:12:55"))
+        binding.searchBle.setOnClickListener() {
+            // 로티 애니메이션
+            val animation = binding.searchBle
+            animation.playAnimation()
 
+            // 블루투스
+            // Bluetooth매니저 : 블루투스 어댑터를 만들수 있다.
+            val bleManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            // Bluetooth어댑터 : 장치검색,
+            val bluetoothAdapter = bleManager.adapter
 
-        binding.deviceRecyclerView.adapter = deviceAdapter
-        binding.deviceRecyclerView.layoutManager = LinearLayoutManager(this)
+            val targetAddress = "60:C0:BF:ED:5E:DF"
 
+            var device : BluetoothDevice? = null
 
-        // 블투 스캔 권한 체크. 없으면 요구.
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.BLUETOOTH_SCAN
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this@MainActivity,
-                arrayOf(Manifest.permission.BLUETOOTH_SCAN),
-                1
-            )
+            val callback : ScanCallback = object : ScanCallback() {
+                override fun onScanResult(callbackType: Int, result: ScanResult?) {
+                    super.onScanResult(callbackType, result)
+
+                    val serviceDataMap = result?.scanRecord?.serviceData
+                    val deviceInfo = result?.device
+
+                    Log.d("choco5732", "mac : ${deviceInfo?.address}, id : ${deviceInfo?.name}")
+                    deviceAdapter.addDevice(Device("${deviceInfo?.name}", "${deviceInfo?.address}", deviceInfo))
+                    device = result?.device
+
+                    Log.d("choco5732", "onScanResult")
+                    Log.d("choco5732", "scanning : ${device.toString()}")
+
+                }
+
+                override fun onBatchScanResults(results: MutableList<ScanResult>?) {
+                    super.onBatchScanResults(results)
+                    Log.d("choco5732", "onBatchScanResults")
+                }
+
+                override fun onScanFailed(errorCode: Int) {
+                    super.onScanFailed(errorCode)
+                    Log.d("choco5732", "errorCode : ${errorCode}")
+                    Log.d("choco5732", "onScanFailed")
+                }
+            }
+            scanLeDevice(callback,bluetoothAdapter.bluetoothLeScanner)
         }
+    }
+
+
+    private fun initView() = with(binding) {
+
+        // 리사이클러뷰 어댑터 설정
+        deviceRecyclerView.adapter = deviceAdapter
+        deviceRecyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
 
         // 스플래쉬 API 애니메이션 설정
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -110,66 +157,26 @@ class MainActivity : AppCompatActivity() {
                 slideUp.start()
             }
         }
+    }
 
-        // 텍스트 눌러을 시, 블루투스 아이콘 색 바꾸기 (실험)
-        binding.mainHelloTv.setOnClickListener {
-            if (isBlue) {
-                binding.mainBluetooth.setImageResource(R.drawable.ic_bluetooth_red)
-            } else {
-                binding.mainBluetooth.setImageResource(R.drawable.ic_bluetooth_blue)
-            }
-            isBlue = !isBlue
-        }
-
-        binding.mainBluetooth.setOnClickListener() {
-
-            // 블루투스
-            // Bluetooth매니저 : 블루투스 어댑터를 만들수 있다.
-            val bleManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            // Bluetooth어댑터 : 장치검색,
-            val bluetoothAdapter = bleManager.adapter
-
-            val targetAddress = "60:C0:BF:ED:5E:DF"
-//        val device : BluetoothDevice = bluetoothAdapter.getRemoteDevice(targetAddress)
-
-            var device : BluetoothDevice? = null
-
-            val callback : ScanCallback = object : ScanCallback() {
-                override fun onScanResult(callbackType: Int, result: ScanResult?) {
-                    super.onScanResult(callbackType, result)
-
-                    device = result?.device
-
-//                if ( device?.address.toString() == targetAddress) {
-//                    Log.d("choco5732", "find it! mac is : ${device?.address}")
-//                }
-
-                    Log.d("choco5732", "onScanResult")
-                    Log.d("choco5732", "scanning : ${device.toString()}")
-
-                }
-
-                override fun onBatchScanResults(results: MutableList<ScanResult>?) {
-                    super.onBatchScanResults(results)
-                    Log.d("choco5732", "onBatchScanResults")
-                }
-
-                override fun onScanFailed(errorCode: Int) {
-                    super.onScanFailed(errorCode)
-                    Log.d("choco5732", "errorCode : ${errorCode}")
-                    Log.d("choco5732", "onScanFailed")
-                }
-            }
-
-            scanLeDevice(callback,bluetoothAdapter.bluetoothLeScanner)
-
-//            bluetoothAdapter.getBluetoothLeScanner().startScan(callback)
-//            Toast.makeText(this, "스캔이 시작됩니다. ", Toast.LENGTH_SHORT).show()
+    private fun initPermission() {
+        // 블투 스캔 권한 체크. 없으면 요구.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                permssions,
+                1
+            )
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                permssionsFor29,
+                1
+            )
         }
     }
 
-
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission", "ResourceAsColor")
     private fun scanLeDevice(callback: ScanCallback, scanner: BluetoothLeScanner) {
         if (!scanning) { // Stops scanning after a pre-defined scan period.
             handler.postDelayed({

@@ -55,6 +55,7 @@ android {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1-Beta")
     implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("com.airbnb.android:lottie:6.4.0")
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
