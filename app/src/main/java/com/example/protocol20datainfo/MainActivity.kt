@@ -7,7 +7,10 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothProfile
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
@@ -32,6 +35,7 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var binding: MainActivityBinding
     private var isBlue = true // 초기 색은 파란색
+    private var services: MutableList<BluetoothGattService>? = null
 
     private var scanning = false
     private val SCAN_PERIOD: Long = 10000
@@ -44,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             deviceList,
             onClickItem = { position, item ->
                 Log.d("choco5732", "클릭한 장치 name : ${item.deviceName}, mac : ${item.deviceMac}")
-
+                // gatt 연결!
                 item.device?.connectGatt(this, true, gattCallBack)
             }
         )
@@ -54,11 +58,72 @@ class MainActivity : AppCompatActivity() {
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
 
+            when(newState){
+                BluetoothProfile.STATE_CONNECTING -> {
 
+                }
+                BluetoothProfile.STATE_CONNECTED -> {
+                    Log.d("choco5732", "gatt connected!")
+                    gatt?.discoverServices()
+
+                }
+                BluetoothProfile.STATE_DISCONNECTED -> {
+                    gatt?.close()
+                }
+                else -> {
+                    gatt?.close()
+                }
+            }
+        }
+
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt?,
+            characteristic: BluetoothGattCharacteristic?
+        ) {
+            super.onCharacteristicChanged(gatt, characteristic)
+            val data = characteristic!!.value
+            var str = String(data)
+            Log.d("choco5732", str)
+            Log.d("choco5732", "데이터 : ${data.contentToString()}")
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
+
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+               val services = gatt?.services
+
+                services?.forEach { service ->
+                    Log.d("choco5732", "Service UUID: ${service.uuid}")
+
+                    val characteristics = service.characteristics
+                    characteristics.forEach { characteristic ->
+                        Log.d("choco5732", "Characteristic UUID: ${characteristic.uuid}")
+                    }
+                }
+
+                /**
+                 * Service UUID: 00001800-0000-1000-8000-00805f9b34fb
+                 * Characteristic UUID: 00002a00-0000-1000-8000-00805f9b34fb
+                 * Characteristic UUID: 00002a01-0000-1000-8000-00805f9b34fb
+                 * Service UUID: 00001801-0000-1000-8000-00805f9b34fb
+                 * Characteristic UUID: 00002a05-0000-1000-8000-00805f9b34fb
+                 * Characteristic UUID: 00002b29-0000-1000-8000-00805f9b34fb
+                 * Characteristic UUID: 00002b2a-0000-1000-8000-00805f9b34fb
+                 * Service UUID: 0000180f-0000-1000-8000-00805f9b34fb
+                 * Characteristic UUID: 00002a19-0000-1000-8000-00805f9b34fb
+                 * Service UUID: e093f3b5-00a3-a9e5-9eca-40016e0edc24
+                 * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-40026e0edc24
+                 * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-40036e0edc24
+                 * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-60026e0edc24
+                 * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-60036e0edc24
+                 * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-60046e0edc24
+                 * Service UUID: 5441445f-5644-415f-5445-535f4d504147
+                 * Service UUID: 495f4445-5441-4552-435f-595449564954
+                 */
+
+            }
+
         }
     }
 
