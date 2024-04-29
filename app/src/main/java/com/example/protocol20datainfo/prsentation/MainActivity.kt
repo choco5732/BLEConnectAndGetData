@@ -1,8 +1,7 @@
-package com.example.protocol20datainfo
+package com.example.protocol20datainfo.prsentation
 
 import android.Manifest
 import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
@@ -15,11 +14,11 @@ import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.View.OnLongClickListener
 import android.view.animation.AnticipateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -27,7 +26,6 @@ import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.airbnb.lottie.LottieAnimationView
 import com.example.protocol20datainfo.databinding.MainActivityBinding
 
 @SuppressLint("MissingPermission")
@@ -64,6 +62,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 BluetoothProfile.STATE_CONNECTED -> {
                     Log.d("choco5732", "gatt connected!")
+
                     gatt?.discoverServices()
 
                 }
@@ -74,17 +73,6 @@ class MainActivity : AppCompatActivity() {
                     gatt?.close()
                 }
             }
-        }
-
-        override fun onCharacteristicChanged(
-            gatt: BluetoothGatt?,
-            characteristic: BluetoothGattCharacteristic?
-        ) {
-            super.onCharacteristicChanged(gatt, characteristic)
-            val data = characteristic!!.value
-            var str = String(data)
-            Log.d("choco5732", str)
-            Log.d("choco5732", "데이터 : ${data.contentToString()}")
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
@@ -125,6 +113,17 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt?,
+            characteristic: BluetoothGattCharacteristic?
+        ) {
+            super.onCharacteristicChanged(gatt, characteristic)
+            val data = characteristic!!.value
+            var str = String(data)
+            Log.d("choco5732", str)
+//            Log.d("choco5732", "데이터 : ${data.contentToString()}")
+        }
+
     }
 
     private val permssions = arrayOf(
@@ -193,6 +192,21 @@ class MainActivity : AppCompatActivity() {
             }
             scanLeDevice(callback,bluetoothAdapter.bluetoothLeScanner)
         }
+
+//        binding.searchBle.setOnLongClickListener(object : it.OnLongClickListener){
+//            deviceAdapter.clearList()
+//        }
+
+        // BLE 리스트 초기화
+        binding.searchBle.setOnLongClickListener(object : OnLongClickListener{
+            override fun onLongClick(v: View?): Boolean {
+                deviceAdapter.clearList()
+                Toast.makeText(this@MainActivity, "목록이 초기화 됩니다.", Toast.LENGTH_SHORT).show()
+                return true
+            }
+        })
+
+
     }
 
 

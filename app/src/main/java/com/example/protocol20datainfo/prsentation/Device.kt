@@ -1,4 +1,4 @@
-package com.example.protocol20datainfo
+package com.example.protocol20datainfo.prsentation
 
 import android.bluetooth.BluetoothDevice
 import android.os.Parcelable

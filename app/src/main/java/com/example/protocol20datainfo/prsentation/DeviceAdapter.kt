@@ -1,9 +1,9 @@
-package com.example.protocol20datainfo
+package com.example.protocol20datainfo.prsentation
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.protocol20datainfo.R
 import com.example.protocol20datainfo.databinding.DeviceItemBinding
 
 class DeviceAdapter(
@@ -36,6 +36,11 @@ class DeviceAdapter(
             deviceList.add(item)
             notifyItemInserted(deviceList.size - 1)
         }
+    }
+
+    fun clearList() {
+        deviceList.clear()
+        notifyDataSetChanged()
     }
 
 
