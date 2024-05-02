@@ -27,9 +27,22 @@ import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.protocol20datainfo.databinding.MainActivityBinding
+import java.util.UUID
 
 @SuppressLint("MissingPermission")
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        /**
+         * Service UUID: e093f3b5-00a3-a9e5-9eca-40016e0edc24
+         *                  * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-40026e0edc24
+         *                  * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-40036e0edc24
+         */
+
+        const val serviceUuid = "e093f3b5-00a3-a9e5-9eca-40016e0edc24"
+        const val characteristicUuidWrite = "e093f3b5-00a3-a9e5-9eca-40036e0edc24"
+        const val characteristicUuidRead = "e093f3b5-00a3-a9e5-9eca-40026e0edc24"
+    }
 
     lateinit var binding: MainActivityBinding
     private var isBlue = true // 초기 색은 파란색
@@ -48,6 +61,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d("choco5732", "클릭한 장치 name : ${item.deviceName}, mac : ${item.deviceMac}")
                 // gatt 연결!
                 item.device?.connectGatt(this, true, gattCallBack)
+                Toast.makeText(this@MainActivity, "${item.deviceName}에 연결 중입니다...", Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -59,8 +73,11 @@ class MainActivity : AppCompatActivity() {
             when(newState){
                 BluetoothProfile.STATE_CONNECTING -> {
 
+//                    Toast.makeText(this@MainActivity, "연결 중입니다...", Toast.LENGTH_SHORT).show()
+
                 }
                 BluetoothProfile.STATE_CONNECTED -> {
+//                    Toast.makeText(this@MainActivity, "${gatt?.device?.name}와(과) 연결 되었습니다!", Toast.LENGTH_SHORT).show()
                     Log.d("choco5732", "gatt connected!")
 
                     gatt?.discoverServices()
@@ -68,9 +85,11 @@ class MainActivity : AppCompatActivity() {
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     gatt?.close()
+//                    Toast.makeText(this@MainActivity, "연결 실패", Toast.LENGTH_SHORT).show()
                 }
                 else -> {
                     gatt?.close()
+//                    Toast.makeText(this@MainActivity, "연결 실패", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -79,7 +98,10 @@ class MainActivity : AppCompatActivity() {
             super.onServicesDiscovered(gatt, status)
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
-               val services = gatt?.services
+
+                Log.d("choco5732", "가트 연결이 되었고, onServiceDiscoverd에 진입!")
+                val services = gatt?.services
+                lateinit var service : BluetoothGattService
 
                 services?.forEach { service ->
                     Log.d("choco5732", "Service UUID: ${service.uuid}")
@@ -90,27 +112,38 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                /**
-                 * Service UUID: 00001800-0000-1000-8000-00805f9b34fb
-                 * Characteristic UUID: 00002a00-0000-1000-8000-00805f9b34fb
-                 * Characteristic UUID: 00002a01-0000-1000-8000-00805f9b34fb
-                 * Service UUID: 00001801-0000-1000-8000-00805f9b34fb
-                 * Characteristic UUID: 00002a05-0000-1000-8000-00805f9b34fb
-                 * Characteristic UUID: 00002b29-0000-1000-8000-00805f9b34fb
-                 * Characteristic UUID: 00002b2a-0000-1000-8000-00805f9b34fb
-                 * Service UUID: 0000180f-0000-1000-8000-00805f9b34fb
-                 * Characteristic UUID: 00002a19-0000-1000-8000-00805f9b34fb
-                 * Service UUID: e093f3b5-00a3-a9e5-9eca-40016e0edc24
-                 * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-40026e0edc24
-                 * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-40036e0edc24
-                 * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-60026e0edc24
-                 * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-60036e0edc24
-                 * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-60046e0edc24
-                 * Service UUID: 5441445f-5644-415f-5445-535f4d504147
-                 * Service UUID: 495f4445-5441-4552-435f-595449564954
-                 */
 
+                val characteristicUUID = UUID.fromString(characteristicUuidRead)
+
+                var found = false
+                var i = 0
+                while (i < services!!.size && !found) {
+                    service = services[i]
+                    //                Log.e(TAG,"SERVICES <"+i+"> : "+service.getUuid().toString());
+                    if (service.uuid.toString().equals(serviceUuid, ignoreCase = true)) {
+                        found = true
+                    } else {
+                        i++
+                    }
+                }
+
+                if (found) {
+                    service = services[i]
+                }
+
+                Log.d("choco5732", "찾은 서비스는 ${service.toString()}입니다.")
+
+                val finalCharacteristic = service.getCharacteristic(characteristicUUID)
+//                val finaldescriptor = finalCharacteristic.getDescriptor()
+                gatt.setCharacteristicNotification(finalCharacteristic, true)
+
+                Toast.makeText(this@MainActivity, "${gatt.device.name} 에 연결되었습니다!",Toast.LENGTH_SHORT).show()
+
+
+            } else {
+                Log.d("choco5732" ,"가트 진입 실패!")
             }
+
 
         }
         override fun onCharacteristicChanged(
@@ -119,8 +152,9 @@ class MainActivity : AppCompatActivity() {
         ) {
             super.onCharacteristicChanged(gatt, characteristic)
             val data = characteristic!!.value
+//            Log.d("choco5732", data[0]
             var str = String(data)
-            Log.d("choco5732", str)
+            Log.d("choco5732", "불러온 데이터는 :$str")
 //            Log.d("choco5732", "데이터 : ${data.contentToString()}")
         }
 
