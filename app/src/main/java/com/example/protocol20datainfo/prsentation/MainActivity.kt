@@ -58,6 +58,8 @@ class MainActivity : AppCompatActivity() {
     private val handler = android.os.Handler()
     lateinit var mGatt : BluetoothGatt
 
+    var count = 1
+
     private val deviceList = ArrayList<Device>()
 
     private val deviceAdapter by lazy {
@@ -177,6 +179,7 @@ class MainActivity : AppCompatActivity() {
             super.onCharacteristicChanged(gatt, characteristic)
             val data = characteristic!!.value
 
+
             /**
              * stx 2바이트
              * productID 2바이트
@@ -220,21 +223,40 @@ class MainActivity : AppCompatActivity() {
             val time5 = data[10]
             val time6 = data[11]
 
-            Log.d("data", "time : ${time1}년 ${time2}월 ${time3}일 ${time4}시 ${time5}분 ${time6}초 ")
+            Log.d("data", "time : 20${time1}년 ${time2}월 ${time3}일 ${time4}시 ${time5}분 ${time6}초 ")
 
-//            data[0] :
-//            data[1] :
-//            data[2] :
+            val temperature1 = data[data.size - 6]
+            val temperature2 = data[data.size - 5]
 
+//            val temp = Byte.toUnsin
+            // 온도
+            val nTemperature =
+                java.lang.Byte.toUnsignedInt(data[data.size - 6]) * 256 + java.lang.Byte.toUnsignedInt(
+                    data[data.size - 5]
+                )
+            val temparature = nTemperature.toDouble() / 100.0f
+
+
+            Log.d("data", "temperature : $temparature")
+
+            // 배터리
+            val nBatLevel =
+                java.lang.Byte.toUnsignedInt(data[data.size - 4]) * 256 + java.lang.Byte.toUnsignedInt(
+                    data[data.size - 3]
+                )
+            val battery = nBatLevel.toDouble() / 10000.0f
+
+            Log.d("data", "battery : $battery")
 
 
 //            Log.d("choco5732", data[0]
             var str = String(data)
-            Log.d("choco5732", "불러온 데이터는 :$str")
-//            Log.d("choco5732", "데이터 : ${data.contentToString()}")
-        }
+            Log.d("choco5732", "${count} 번째 불러온 데이터는 :$str")
+            count++
 
+        }
     }
+
 
     private val permssions = arrayOf (
         Manifest.permission.ACCESS_FINE_LOCATION,
