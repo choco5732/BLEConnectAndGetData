@@ -39,9 +39,14 @@ class MainActivity : AppCompatActivity() {
          *                  * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-40036e0edc24
          */
 
-        const val serviceUuid = "e093f3b5-00a3-a9e5-9eca-40016e0edc24"
-        const val characteristicUuidWrite = "e093f3b5-00a3-a9e5-9eca-40036e0edc24"
-        const val characteristicUuidRead = "e093f3b5-00a3-a9e5-9eca-40026e0edc24"
+        const val serviceUuidT10 = "e093f3b5-00a3-a9e5-9eca-40016e0edc24"
+        const val characteristicUuidWriteT10 = "e093f3b5-00a3-a9e5-9eca-40036e0edc24"
+        const val characteristicUuidReadT10 = "e093f3b5-00a3-a9e5-9eca-40026e0edc24"
+
+
+        private const val UUID_CONNECTION_SERVICE_T01 = "e1b40000-ffc4-4daa-a49b-1c92f99072ab"
+        private const val UUID_CONNECTION_CHARACTERISTIC_WRITE_T01 = "e1b40002-ffc4-4daa-a49b-1c92f99072ab"
+        private const val UUID_CONNECTION_CHARACTERISTIC_READ_T01 = "e1b40001-ffc4-4daa-a49b-1c92f99072ab"
     }
 
     lateinit var binding: MainActivityBinding
@@ -51,6 +56,7 @@ class MainActivity : AppCompatActivity() {
     private var scanning = false
     private val SCAN_PERIOD: Long = 10000
     private val handler = android.os.Handler()
+    lateinit var mGatt : BluetoothGatt
 
     private val deviceList = ArrayList<Device>()
 
@@ -60,7 +66,8 @@ class MainActivity : AppCompatActivity() {
             onClickItem = { position, item ->
                 Log.d("choco5732", "클릭한 장치 name : ${item.deviceName}, mac : ${item.deviceMac}")
                 // gatt 연결!
-                item.device?.connectGatt(this, true, gattCallBack)
+//                item.device!!.connectGatt(this, true, gattCallBack)
+                mGatt = item.device!!.connectGatt(this, true, gattCallBack)
                 Toast.makeText(this@MainActivity, "${item.deviceName}에 연결 중입니다...", Toast.LENGTH_SHORT).show()
             }
         )
@@ -70,11 +77,13 @@ class MainActivity : AppCompatActivity() {
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
 
+
+
             when(newState){
                 BluetoothProfile.STATE_CONNECTING -> {
 
 //                    Toast.makeText(this@MainActivity, "연결 중입니다...", Toast.LENGTH_SHORT).show()
-
+                    Log.d("choco5732", "gatt connecting~")
                 }
                 BluetoothProfile.STATE_CONNECTED -> {
 //                    Toast.makeText(this@MainActivity, "${gatt?.device?.name}와(과) 연결 되었습니다!", Toast.LENGTH_SHORT).show()
@@ -85,6 +94,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     gatt?.close()
+                    Log.d("choco5732", "gatt disconnected!!!")
 //                    Toast.makeText(this@MainActivity, "연결 실패", Toast.LENGTH_SHORT).show()
                 }
                 else -> {
@@ -99,7 +109,9 @@ class MainActivity : AppCompatActivity() {
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
 
-                Log.d("choco5732", "가트 연결이 되었고, onServiceDiscoverd에 진입!")
+                Log.d("choco5732", "가트 연결이 되었고, onServicesDiscovered에 진입!")
+
+                // 서비스 조회
                 val services = gatt?.services
                 lateinit var service : BluetoothGattService
 
@@ -113,22 +125,34 @@ class MainActivity : AppCompatActivity() {
                 }
 
 
-                val characteristicUUID = UUID.fromString(characteristicUuidRead)
+                val characteristicUUID = UUID.fromString(characteristicUuidReadT10)
+
+                // 원하는 서비스 가져옴 ( 수정필요 )
+//                var found = false
+//                var i = 0
+//                while (i < services!!.size && !found) {
+//                    service = services[i]
+//                    //                Log.e(TAG,"SERVICES <"+i+"> : "+service.getUuid().toString());
+//                    if (service.uuid.toString().equals(serviceUuidT10, ignoreCase = true)) {
+//                        found = true
+//                    } else {
+//                        i++
+//                    }
+//                }
+//
+//                if (found) {
+//                    service = services[i]
+//                }
 
                 var found = false
                 var i = 0
                 while (i < services!!.size && !found) {
-                    service = services[i]
-                    //                Log.e(TAG,"SERVICES <"+i+"> : "+service.getUuid().toString());
-                    if (service.uuid.toString().equals(serviceUuid, ignoreCase = true)) {
+                    val currentService = services[i]
+                    if (currentService.uuid.toString().equals(serviceUuidT10, ignoreCase = true)) {
+                        service = currentService
                         found = true
-                    } else {
-                        i++
                     }
-                }
-
-                if (found) {
-                    service = services[i]
+                    i++
                 }
 
                 Log.d("choco5732", "찾은 서비스는 ${service.toString()}입니다.")
@@ -152,6 +176,58 @@ class MainActivity : AppCompatActivity() {
         ) {
             super.onCharacteristicChanged(gatt, characteristic)
             val data = characteristic!!.value
+
+            /**
+             * stx 2바이트
+             * productID 2바이트
+             * command 1바이트
+             * length 1바이트
+             * data & time 6바이트
+             * weo level n바이트
+             * aeo level n바이트
+             * wep level 2바이트
+             * aep level 2바이트
+             * temperature 2바이트
+             * battery Level 2바이트
+             * crc16 2바이트
+             */
+
+            val stx1 = data[0]
+            val stx2 = data[1]
+            Log.d("data", "stx1 : ${stx1}, stx2: ${stx2}")
+
+            val productId1 = data[2]
+            val productId2 = data[3]
+            Log.d("data", "productId1 : ${productId1}, productId2 : ${productId2}")
+//            printf("%02X\n", 10);   // 출력 (앞의 빈자리를 0으로 채우기): 0A
+            Log.d("data", "productId1 converted : ${String.format("0x%02X ", productId1)}, productId2 : ${String.format("0x%02X ", productId2)}" )
+            // 왜 0x%02X라는 작업을 포맷하는가? 오늘 파일이 16진수인가?
+
+            Log.d("data", "data의 길이 : ${data.size}")
+            val command = data[4]
+            Log.d("data", "command : $command")
+
+            Log.d("data", "command converted : ${String.format("0x%02X", command)}")
+
+            val length = data[5]
+            Log.d("data", "protocol length : $length")
+
+
+            val time1 = data[6]
+            val time2 = data[7]
+            val time3 = data[8]
+            val time4 = data[9]
+            val time5 = data[10]
+            val time6 = data[11]
+
+            Log.d("data", "time : ${time1}년 ${time2}월 ${time3}일 ${time4}시 ${time5}분 ${time6}초 ")
+
+//            data[0] :
+//            data[1] :
+//            data[2] :
+
+
+
 //            Log.d("choco5732", data[0]
             var str = String(data)
             Log.d("choco5732", "불러온 데이터는 :$str")
@@ -160,7 +236,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private val permssions = arrayOf(
+    private val permssions = arrayOf (
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.BLUETOOTH_SCAN,
         Manifest.permission.BLUETOOTH_CONNECT,
@@ -168,7 +244,7 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.SCHEDULE_EXACT_ALARM,
         Manifest.permission.USE_EXACT_ALARM
     )
-    private val permssionsFor29 = arrayOf(
+    private val permssionsFor29 = arrayOf (
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION
     )
@@ -179,8 +255,30 @@ class MainActivity : AppCompatActivity() {
         installSplashScreen() // 꼭 binding.root 위에 있어야 한다. 명심!
         setContentView(binding.root)
 
+//
+//        val bluetoothGatt : BluetoothGatt? = null
+//        bluetoothGatt.setPreferredConnectionParameters
+//        val gattt :BluetoothGatt? = null
+////        gattt?.requestConnectionParameterUpdate()
         initView()
         initPermission()
+
+//        val test : BluetoothGatt?
+//        test.requestLeConnectionUpdate // 히든함수, 메소드 invoke 히든 접근법 다름 refresh gatt
+//        val connectionParams = BluetoothGattConnectionParams.Builder()
+//            .setMinInterval(minIntervalMillis)
+//            .setMaxInterval(maxIntervalMillis)
+//            .setMinLatency(minLatencyMillis)
+//            .setMaxLatency(maxLatencyMillis)
+//            .setDisconnectionTimeout(disconnectionTimeoutMillis)
+//
+//
+//        val test2 : BluetoothDevice?
+//        test2.setPreferredConn
+        binding.mainHelloTv.setOnClickListener() {
+            mGatt.disconnect()
+        }
+
 
         binding.searchBle.setOnClickListener() {
             // 로티 애니메이션
