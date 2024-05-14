@@ -27,43 +27,4 @@
         app:layout_constraintEnd_toEndOf="parent">
     </com.google.android.material.tabs.TabLayout>
 
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
-<!--    <com.airbnb.lottie.LottieAnimationView-->
-<!--        android:id="@+id/search_ble"-->
-<!--        android:layout_width="100dp"-->
-<!--        android:layout_height="100dp"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/main_hello_tv"-->
-<!--        app:lottie_rawRes="@raw/robot_lotti"-->
-<!--        app:lottie_autoPlay="false"-->
-<!--        app:lottie_repeatCount="1"-->
-<!--        app:lottie_loop="true"-->
-<!--        tools:ignore="MissingClass">-->
-<!--        </com.airbnb.lottie.LottieAnimationView>-->
-
-<!--        <androidx.recyclerview.widget.RecyclerView-->
-<!--            android:id="@+id/device_recycler_view"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            tools:listitem="@layout/device_item"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/search_ble">-->
-<!--        </androidx.recyclerview.widget.RecyclerView>-->
-<!--    <TextView-->
-<!--        android:id="@+id/main_hello_tv"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:gravity="center"-->
-<!--        android:text="@string/main_text1"-->
-<!--        android:textColor="@color/black"-->
-<!--        android:textSize="40dp"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintBottom_toTopOf="@id/search_ble"-->
-<!--        >-->
-<!--    </TextView>-->

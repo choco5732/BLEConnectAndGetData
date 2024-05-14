@@ -1,14 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".prsentation.BleInfoFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView
+        android:id="@+id/ble_detail_device_name_title"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:text="기기명"
+        android:textSize="25dp"
+        android:textStyle="bold"
+        android:layout_marginStart="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+    <TextView
+        android:id="@+id/ble_detail_device_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="agms_T10..."
+        android:layout_marginStart="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ble_detail_device_name_title"
+        app:layout_constraintBottom_toTopOf="@id/ble_detil_receiving_data_title"
+        />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/ble_detil_receiving_data_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="들어오는 데이터"
+        android:textStyle="bold"
+        android:textSize="25dp"
+        android:layout_marginStart="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ble_detail_device_name"
+        ></TextView>
+    <TextView
+        android:id="@+id/ble_detil_receiving_data"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:text="데이터들 ..."
+        android:layout_marginStart="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ble_detil_receiving_data_title"
+        app:layout_constraintBottom_toBottomOf="parent"
+        ></TextView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

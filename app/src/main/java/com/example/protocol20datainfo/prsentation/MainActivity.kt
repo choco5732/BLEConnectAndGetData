@@ -27,6 +27,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.protocol20datainfo.databinding.MainActivityBinding
+import com.google.android.material.tabs.TabLayoutMediator
 import java.util.UUID
 
 @SuppressLint("MissingPermission")
@@ -38,11 +39,9 @@ class MainActivity : AppCompatActivity() {
          *                  * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-40026e0edc24
          *                  * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-40036e0edc24
          */
-
         const val serviceUuidT10 = "e093f3b5-00a3-a9e5-9eca-40016e0edc24"
         const val characteristicUuidWriteT10 = "e093f3b5-00a3-a9e5-9eca-40036e0edc24"
         const val characteristicUuidReadT10 = "e093f3b5-00a3-a9e5-9eca-40026e0edc24"
-
 
         private const val UUID_CONNECTION_SERVICE_T01 = "e1b40000-ffc4-4daa-a49b-1c92f99072ab"
         private const val UUID_CONNECTION_CHARACTERISTIC_WRITE_T01 = "e1b40002-ffc4-4daa-a49b-1c92f99072ab"
@@ -57,6 +56,10 @@ class MainActivity : AppCompatActivity() {
     private val SCAN_PERIOD: Long = 10000
     private val handler = android.os.Handler()
     lateinit var mGatt : BluetoothGatt
+
+    private val viewPagerAdapter by lazy {
+        MainViewPagerAdapter(this)
+    }
 
     var count = 1
 
@@ -83,16 +86,13 @@ class MainActivity : AppCompatActivity() {
 
             when(newState){
                 BluetoothProfile.STATE_CONNECTING -> {
-
 //                    Toast.makeText(this@MainActivity, "연결 중입니다...", Toast.LENGTH_SHORT).show()
                     Log.d("choco5732", "gatt connecting~")
                 }
                 BluetoothProfile.STATE_CONNECTED -> {
 //                    Toast.makeText(this@MainActivity, "${gatt?.device?.name}와(과) 연결 되었습니다!", Toast.LENGTH_SHORT).show()
                     Log.d("choco5732", "gatt connected!")
-
                     gatt?.discoverServices()
-
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     gatt?.close()
@@ -108,33 +108,26 @@ class MainActivity : AppCompatActivity() {
 
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
-
             if (status == BluetoothGatt.GATT_SUCCESS) {
-
                 Log.d("choco5732", "가트 연결이 되었고, onServicesDiscovered에 진입!")
-
                 // 서비스 조회
                 val services = gatt?.services
                 lateinit var service : BluetoothGattService
-
                 services?.forEach { service ->
                     Log.d("choco5732", "Service UUID: ${service.uuid}")
-
                     val characteristics = service.characteristics
                     characteristics.forEach { characteristic ->
                         Log.d("choco5732", "Characteristic UUID: ${characteristic.uuid}")
                     }
                 }
 
-
                 val characteristicUUID = UUID.fromString(characteristicUuidReadT10)
-
                 // 원하는 서비스 가져옴 ( 수정필요 )
 //                var found = false
 //                var i = 0
 //                while (i < services!!.size && !found) {
 //                    service = services[i]
-//                    //                Log.e(TAG,"SERVICES <"+i+"> : "+service.getUuid().toString());
+//                                    Log.e(TAG,"SERVICES <"+i+"> : "+service.getUuid().toString());
 //                    if (service.uuid.toString().equals(serviceUuidT10, ignoreCase = true)) {
 //                        found = true
 //                    } else {
@@ -164,8 +157,6 @@ class MainActivity : AppCompatActivity() {
                 gatt.setCharacteristicNotification(finalCharacteristic, true)
 
                 Toast.makeText(this@MainActivity, "${gatt.device.name} 에 연결되었습니다!",Toast.LENGTH_SHORT).show()
-
-
             } else {
                 Log.d("choco5732" ,"가트 진입 실패!")
             }
@@ -273,76 +264,75 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = MainActivityBinding.inflate(layoutInflater)
         installSplashScreen() // 꼭 binding.root 위에 있어야 한다. 명심!
+        binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         initView()
-        initPermission()
-
-        binding.mainHelloTv.setOnClickListener() {
-            mGatt.disconnect()
-        }
-
-
-        binding.searchBle.setOnClickListener() {
-            // 로티 애니메이션
-            val animation = binding.searchBle
-            animation.playAnimation()
-
-            // 블루투스
-            // Bluetooth매니저 : 블루투스 어댑터를 만들수 있다.
+//        initPermission()
+//
+//        binding.mainHelloTv.setOnClickListener() {
+//            mGatt.disconnect()
+//        }
+//
+//
+//        binding.searchBle.setOnClickListener() {
+//            // 로티 애니메이션
+//            val animation = binding.searchBle
+//            animation.playAnimation()
+//
+//            // 블루투스
+//            // Bluetooth매니저 : 블루투스 어댑터를 만들수 있다.
             val bleManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            // Bluetooth어댑터 : 장치검색,
-            val bluetoothAdapter = bleManager.adapter
-
-            // val targetAddress = "60:C0:BF:ED:5E:DF"
-
-            var device : BluetoothDevice? = null
-
-            val callback : ScanCallback = object : ScanCallback() {
-                override fun onScanResult(callbackType: Int, result: ScanResult?) {
-                    super.onScanResult(callbackType, result)
-
-                    val serviceDataMap = result?.scanRecord?.serviceData
-                    val deviceInfo = result?.device
-
-                    Log.d("choco5732", "mac : ${deviceInfo?.address}, id : ${deviceInfo?.name}")
-                    deviceAdapter.addDevice(Device("${deviceInfo?.name}", "${deviceInfo?.address}", deviceInfo))
-                    device = result?.device
-
-                    Log.d("choco5732", "onScanResult")
-                    Log.d("choco5732", "scanning : ${device.toString()}")
-
-                }
-
-                override fun onBatchScanResults(results: MutableList<ScanResult>?) {
-                    super.onBatchScanResults(results)
-                    Log.d("choco5732", "onBatchScanResults")
-                }
-
-                override fun onScanFailed(errorCode: Int) {
-                    super.onScanFailed(errorCode)
-                    Log.d("choco5732", "errorCode : ${errorCode}")
-                    Log.d("choco5732", "onScanFailed")
-                }
-            }
-            scanLeDevice(callback,bluetoothAdapter.bluetoothLeScanner)
-        }
-
+//            // Bluetooth어댑터 : 장치검색,
+//            val bluetoothAdapter = bleManager.adapter
+//
+//            // val targetAddress = "60:C0:BF:ED:5E:DF"
+//
+//            var device : BluetoothDevice? = null
+//
+//            val callback : ScanCallback = object : ScanCallback() {
+//                override fun onScanResult(callbackType: Int, result: ScanResult?) {
+//                    super.onScanResult(callbackType, result)
+//
+//                    val serviceDataMap = result?.scanRecord?.serviceData
+//                    val deviceInfo = result?.device
+//
+//                    Log.d("choco5732", "mac : ${deviceInfo?.address}, id : ${deviceInfo?.name}")
+//                    deviceAdapter.addDevice(Device("${deviceInfo?.name}", "${deviceInfo?.address}", deviceInfo))
+//                    device = result?.device
+//
+//                    Log.d("choco5732", "onScanResult")
+//                    Log.d("choco5732", "scanning : ${device.toString()}")
+//
+//                }
+//
+//                override fun onBatchScanResults(results: MutableList<ScanResult>?) {
+//                    super.onBatchScanResults(results)
+//                    Log.d("choco5732", "onBatchScanResults")
+//                }
+//
+//                override fun onScanFailed(errorCode: Int) {
+//                    super.onScanFailed(errorCode)
+//                    Log.d("choco5732", "errorCode : ${errorCode}")
+//                    Log.d("choco5732", "onScanFailed")
+//                }
+//            }
+//            scanLeDevice(callback,bluetoothAdapter.bluetoothLeScanner)
+//        }
+//
 //        binding.searchBle.setOnLongClickListener(object : it.OnLongClickListener){
 //            deviceAdapter.clearList()
 //        }
-
-        // BLE 리스트 초기화
-        binding.searchBle.setOnLongClickListener(object : OnLongClickListener{
-            override fun onLongClick(v: View?): Boolean {
-                deviceAdapter.clearList()
-                Toast.makeText(this@MainActivity, "목록이 초기화 됩니다.", Toast.LENGTH_SHORT).show()
-                return true
-            }
-        })
+//
+//         BLE 리스트 초기화
+//        binding.searchBle.setOnLongClickListener(object : OnLongClickListener{
+//            override fun onLongClick(v: View?): Boolean {
+//                deviceAdapter.clearList()
+//                Toast.makeText(this@MainActivity, "목록이 초기화 됩니다.", Toast.LENGTH_SHORT).show()
+//                return true
+//            }
+//        })
 
 
     }
@@ -350,9 +340,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun initView() = with(binding) {
 
+        viewPager.adapter = viewPagerAdapter
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.setText(viewPagerAdapter.getTitle(position))
+        }.attach()
+
         // 리사이클러뷰 어댑터 설정
-        deviceRecyclerView.adapter = deviceAdapter
-        deviceRecyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
+//        deviceRecyclerView.adapter = deviceAdapter
+//        deviceRecyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
 
         // 스플래쉬 API 애니메이션 설정
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -393,21 +388,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("MissingPermission", "ResourceAsColor")
-    private fun scanLeDevice(callback: ScanCallback, scanner: BluetoothLeScanner) {
-        if (!scanning) { // Stops scanning after a pre-defined scan period.
-            handler.postDelayed({
-                scanning = false
-                scanner.stopScan(callback)
-                Toast.makeText(this, "스캔 종료 ", Toast.LENGTH_SHORT).show()
-            }, SCAN_PERIOD)
-            scanning = true
-            scanner.startScan(callback)
-            Toast.makeText(this, "스캔이 시작됩니다. ", Toast.LENGTH_SHORT).show()
-        } else {
-            scanning = false
-            scanner.stopScan(callback)
-            Toast.makeText(this, "스캔 종료 ", Toast.LENGTH_SHORT).show()
-        }
-    }
+//    @SuppressLint("MissingPermission", "ResourceAsColor")
+//    private fun scanLeDevice(callback: ScanCallback, scanner: BluetoothLeScanner) {
+//        if (!scanning) { // Stops scanning after a pre-defined scan period.
+//            handler.postDelayed({
+//                scanning = false
+//                scanner.stopScan(callback)
+//                Toast.makeText(this, "스캔 종료 ", Toast.LENGTH_SHORT).show()
+//            }, SCAN_PERIOD)
+//            scanning = true
+//            scanner.startScan(callback)
+//            Toast.makeText(this, "스캔이 시작됩니다. ", Toast.LENGTH_SHORT).show()
+//        } else {
+//            scanning = false
+//            scanner.stopScan(callback)
+//            Toast.makeText(this, "스캔 종료 ", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 }
