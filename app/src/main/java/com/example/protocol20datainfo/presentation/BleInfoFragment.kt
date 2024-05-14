@@ -1,4 +1,4 @@
-package com.example.protocol20datainfo.prsentation
+package com.example.protocol20datainfo.presentation
 
 import android.os.Bundle
 import android.util.Log
@@ -7,9 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import com.example.protocol20datainfo.R
 import com.example.protocol20datainfo.databinding.FragmentBleInfoBinding
-import com.example.protocol20datainfo.databinding.FragmentBleListBinding
 
 class BleInfoFragment : Fragment() {
 
@@ -21,7 +19,7 @@ class BleInfoFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: MainViewModel by lazy {
-        ViewModelProvider(this)[MainViewModel::class.java]
+        ViewModelProvider(requireActivity())[MainViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -37,14 +35,12 @@ class BleInfoFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d("choco5732","상세 프래그먼트 onViewCreated")
         initViewModel()
-
     }
 
     override fun onResume() {
         super.onResume()
         initViewModel()
         Log.d("choco5732","상세 프래그먼트 onResume")
-
     }
 
     override fun onPause() {
@@ -56,9 +52,14 @@ class BleInfoFragment : Fragment() {
     private fun initViewModel() = with(viewModel) {
         data.observe(viewLifecycleOwner) {
             Log.d("choco5732","상세 프래그먼트 initViewModel")
-            Log.d("choco11111", "상세 프래그먼트! ${it.toString()}")
+            Log.d("choco5732", "상세 프래그먼트! ${it.toString()}")
             binding.bleDetailDeviceName.text = it.deviceName
             binding.bleDetilReceivingData.text = it.toString()
+        }
+
+        test.observe(viewLifecycleOwner) {
+            Log.d("choco5732", "bleInfoFragment에서 테스트 뷰모델 관측 됨!")
+            binding.bleDetailDeviceNameTitle.text = it
         }
     }
 }

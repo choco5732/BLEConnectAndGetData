@@ -1,4 +1,4 @@
-package com.example.protocol20datainfo.prsentation
+package com.example.protocol20datainfo.presentation
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

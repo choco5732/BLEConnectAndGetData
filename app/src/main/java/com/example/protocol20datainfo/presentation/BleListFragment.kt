@@ -1,4 +1,4 @@
-package com.example.protocol20datainfo.prsentation
+package com.example.protocol20datainfo.presentation
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -22,10 +22,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.protocol20datainfo.R
 import com.example.protocol20datainfo.databinding.FragmentBleListBinding
 import java.util.UUID
 
@@ -43,7 +41,7 @@ class BleListFragment : Fragment() {
 
     private val deviceList = ArrayList<Device>()
     private val viewModel: MainViewModel by lazy {
-        ViewModelProvider(this)[MainViewModel::class.java]
+        ViewModelProvider(requireActivity())[MainViewModel::class.java]
     }
 
     private val deviceAdapter by lazy {
@@ -263,7 +261,8 @@ class BleListFragment : Fragment() {
         initPermission()
 
         binding.mainHelloTv.setOnClickListener() {
-
+            Log.d("choco5732", "앙!")
+            viewModel.testFunction("눌림!")
         }
 
 
