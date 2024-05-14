@@ -39,13 +39,13 @@ class BleInfoFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        initViewModel()
+//        initViewModel()
         Log.d("choco5732","상세 프래그먼트 onResume")
     }
 
     override fun onPause() {
         super.onPause()
-        initViewModel()
+//        initViewModel()
         Log.d("choco5732","상세 프래그먼트 onPause")
     }
 

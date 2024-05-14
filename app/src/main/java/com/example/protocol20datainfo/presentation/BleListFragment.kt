@@ -103,22 +103,6 @@ class BleListFragment : Fragment() {
                 }
 
                 val characteristicUUID = UUID.fromString(MainActivity.characteristicUuidReadT10)
-                // 원하는 서비스 가져옴 ( 수정필요 )
-//                var found = false
-//                var i = 0
-//                while (i < services!!.size && !found) {
-//                    service = services[i]
-//                                    Log.e(TAG,"SERVICES <"+i+"> : "+service.getUuid().toString());
-//                    if (service.uuid.toString().equals(serviceUuidT10, ignoreCase = true)) {
-//                        found = true
-//                    } else {
-//                        i++
-//                    }
-//                }
-//
-//                if (found) {
-//                    service = services[i]
-//                }
 
                 var found = false
                 var i = 0
@@ -260,11 +244,10 @@ class BleListFragment : Fragment() {
         initView()
         initPermission()
 
-        binding.mainHelloTv.setOnClickListener() {
-            Log.d("choco5732", "앙!")
-            viewModel.testFunction("눌림!")
+        binding.mainHelloTv.setOnClickListener {
+            viewModel.testFunction(count.toString())
+            count++
         }
-
 
         binding.searchBle.setOnClickListener() {
             // 로티 애니메이션
@@ -311,12 +294,6 @@ class BleListFragment : Fragment() {
             }
             scanLeDevice(callback,bluetoothAdapter.bluetoothLeScanner)
         }
-
-//        binding.searchBle.setOnLongClickListener(object : it.OnLongClickListener){
-//            deviceAdapter.clearList()
-//            return true
-//        }
-
 
 
 //         BLE 리스트 초기화
