@@ -1,5 +1,6 @@
 package com.example.protocol20datainfo.prsentation
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,6 +11,8 @@ class MainViewModel: ViewModel() {
 
 
     fun updateData(data: ProtocolData) {
-        _data.value = data
+        Log.e("choco", "${data.toString()}")
+        _data.postValue(data)
+        Log.e("choco", "_data의 값은 : ${_data.value.toString()}")
     }
 }

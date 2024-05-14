@@ -91,8 +91,8 @@ class BleListFragment : Fragment() {
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Toast.makeText(requireContext(),"가트 연결이 되었고, onServicesDiscovered()에 진입!", Toast.LENGTH_SHORT).show()
-//                Log.d("choco5732", "가트 연결이 되었고, onServicesDiscovered에 진입!")
+//                Toast.makeText(requireContext(),"가트 연결이 되었고, onServicesDiscovered()에 진입!", Toast.LENGTH_SHORT).show()
+                Log.d("choco5732", "가트 연결이 되었고, onServicesDiscovered에 진입!")
                 // 서비스 조회
                 val services = gatt?.services
                 lateinit var service : BluetoothGattService
@@ -139,7 +139,7 @@ class BleListFragment : Fragment() {
 //                val finaldescriptor = finalCharacteristic.getDescriptor()
                 gatt.setCharacteristicNotification(finalCharacteristic, true)
 
-                Toast.makeText(requireContext(), "${gatt.device.name} 에 연결되었습니다! \n데이터를 가져오는 중입니다.. \n잠시만 기다려주세요..",Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "${gatt.device.name} 에 연결되었습니다! \n데이터를 가져오는 중입니다.. \n잠시만 기다려주세요..",Toast.LENGTH_SHORT).show()
             } else {
                 Log.d("choco5732" ,"가트 진입 실패!")
             }
