@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Protocol2.0DataInfo</string>
     <string name="main_text1">BLE 탐색</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="main_tab_ble_list">리스트</string>
+    <string name="main_tab_ble_detail">상세</string>
 </resources>

@@ -68,8 +68,8 @@ class MainActivity : AppCompatActivity() {
             onClickItem = { position, item ->
                 Log.d("choco5732", "클릭한 장치 name : ${item.deviceName}, mac : ${item.deviceMac}")
                 // gatt 연결!
-//                item.device!!.connectGatt(this, true, gattCallBack)
-                mGatt = item.device!!.connectGatt(this, true, gattCallBack)
+                item.device!!.connectGatt(this, true, gattCallBack)
+//                mGatt = item.device!!.connectGatt(this, true, gattCallBack)
                 Toast.makeText(this@MainActivity, "${item.deviceName}에 연결 중입니다...", Toast.LENGTH_SHORT).show()
             }
         )
@@ -277,26 +277,10 @@ class MainActivity : AppCompatActivity() {
         installSplashScreen() // 꼭 binding.root 위에 있어야 한다. 명심!
         setContentView(binding.root)
 
-//
-//        val bluetoothGatt : BluetoothGatt? = null
-//        bluetoothGatt.setPreferredConnectionParameters
-//        val gattt :BluetoothGatt? = null
-////        gattt?.requestConnectionParameterUpdate()
+
         initView()
         initPermission()
 
-//        val test : BluetoothGatt?
-//        test.requestLeConnectionUpdate // 히든함수, 메소드 invoke 히든 접근법 다름 refresh gatt
-//        val connectionParams = BluetoothGattConnectionParams.Builder()
-//            .setMinInterval(minIntervalMillis)
-//            .setMaxInterval(maxIntervalMillis)
-//            .setMinLatency(minLatencyMillis)
-//            .setMaxLatency(maxLatencyMillis)
-//            .setDisconnectionTimeout(disconnectionTimeoutMillis)
-//
-//
-//        val test2 : BluetoothDevice?
-//        test2.setPreferredConn
         binding.mainHelloTv.setOnClickListener() {
             mGatt.disconnect()
         }
@@ -313,7 +297,7 @@ class MainActivity : AppCompatActivity() {
             // Bluetooth어댑터 : 장치검색,
             val bluetoothAdapter = bleManager.adapter
 
-            val targetAddress = "60:C0:BF:ED:5E:DF"
+            // val targetAddress = "60:C0:BF:ED:5E:DF"
 
             var device : BluetoothDevice? = null
 
