@@ -16,21 +16,28 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.protocol20datainfo.databinding.FragmentBleListBinding
+import com.example.protocol20datainfo.presentation.MainActivity.Companion.characteristicUuidWriteT10
 import java.util.UUID
 
 @SuppressLint("MissingPermission")
 class BleListFragment : Fragment() {
 
-    private var services: MutableList<BluetoothGattService>? = null
+    companion object {
+        fun newInstance() = BleListFragment()
+    }
+
+    private var _binding: FragmentBleListBinding? = null
+    private val binding get() = _binding!!
+
 
     private var scanning = false
     private val SCAN_PERIOD: Long = 10000
@@ -89,9 +96,8 @@ class BleListFragment : Fragment() {
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-//                Toast.makeText(requireContext(),"가트 연결이 되었고, onServicesDiscovered()에 진입!", Toast.LENGTH_SHORT).show()
                 Log.d("choco5732", "가트 연결이 되었고, onServicesDiscovered에 진입!")
-                // 서비스 조회
+                // ==== 서비스 조회 ====
                 val services = gatt?.services
                 lateinit var service : BluetoothGattService
                 services?.forEach { service ->
@@ -104,6 +110,7 @@ class BleListFragment : Fragment() {
 
                 val characteristicUUID = UUID.fromString(MainActivity.characteristicUuidReadT10)
 
+                // 원하는 서비스로 지정
                 var found = false
                 var i = 0
                 while (i < services!!.size && !found) {
@@ -117,9 +124,9 @@ class BleListFragment : Fragment() {
 
                 Log.d("choco5732", "찾은 서비스는 ${service.toString()}입니다.")
 
-                val finalCharacteristic = service.getCharacteristic(characteristicUUID)
+                val readCharacteristic = service.getCharacteristic(characteristicUUID)
 //                val finaldescriptor = finalCharacteristic.getDescriptor()
-                gatt.setCharacteristicNotification(finalCharacteristic, true)
+                gatt.setCharacteristicNotification(readCharacteristic, true)
 
                 Toast.makeText(context, "${gatt.device.name} 에 연결되었습니다! \n데이터를 가져오는 중입니다.. \n잠시만 기다려주세요..",Toast.LENGTH_SHORT).show()
             } else {
@@ -136,6 +143,7 @@ class BleListFragment : Fragment() {
             val data = characteristic!!.value
 
             val deviceName = gatt?.device?.name
+
             /**
              * stx 2바이트
              * productID 2바이트
@@ -195,6 +203,7 @@ class BleListFragment : Fragment() {
 
             Log.d("data", "temperature : $temparature")
 
+
             // 배터리
             val nBatLevel =
                 java.lang.Byte.toUnsignedInt(data[data.size - 4]) * 256 + java.lang.Byte.toUnsignedInt(
@@ -220,15 +229,12 @@ class BleListFragment : Fragment() {
             // 뷰모델에 데이터 업데이트
             viewModel.updateData(finalData)
 
+
+            // write 기능
+            writeAgms()
+
         }
     }
-
-    companion object {
-        fun newInstance() = BleListFragment()
-    }
-
-    private var _binding: FragmentBleListBinding? = null
-    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -243,11 +249,6 @@ class BleListFragment : Fragment() {
 
         initView()
         initPermission()
-
-        binding.mainHelloTv.setOnClickListener {
-            viewModel.testFunction(count.toString())
-            count++
-        }
 
         binding.searchBle.setOnClickListener() {
             // 로티 애니메이션
@@ -311,13 +312,13 @@ class BleListFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(
                 requireActivity(),
-                permssions,
+                permissions,
                 1
             )
         } else {
             ActivityCompat.requestPermissions(
                 requireActivity(),
-                permssionsFor29,
+                permissionsFor29,
                 1
             )
         }
@@ -347,7 +348,26 @@ class BleListFragment : Fragment() {
         }
     }
 
-    private val permssions = arrayOf (
+    fun writeAgms(gatt: BluetoothGatt, value: Array<Byte>) {
+        val services: List<BluetoothGattService> = gatt.services
+        lateinit var service : BluetoothGattService
+        var found = false
+        var i = 0
+        while (i < services!!.size && !found) {
+            val currentService = services[i]
+            if (currentService.uuid.toString().equals(MainActivity.serviceUuidT10, ignoreCase = true)) {
+                service = currentService
+                found = true
+            }
+            i++
+        }
+
+        val characteristicUuid = UUID.fromString(characteristicUuidWriteT10)
+        val writeCharacteristic = service.getCharacteristic(characteristicUuid)
+
+    }
+
+    private val permissions = arrayOf (
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.BLUETOOTH_SCAN,
         Manifest.permission.BLUETOOTH_CONNECT,
@@ -356,7 +376,7 @@ class BleListFragment : Fragment() {
         Manifest.permission.USE_EXACT_ALARM
     )
 
-    private val permssionsFor29 = arrayOf (
+    private val permissionsFor29 = arrayOf (
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION
     )
