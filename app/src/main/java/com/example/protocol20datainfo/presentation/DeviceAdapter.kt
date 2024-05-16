@@ -16,14 +16,16 @@ import kotlinx.coroutines.withContext
 
 class DeviceAdapter(
     private val deviceList: ArrayList<Device>,
-    private val onClickItem: (Int, Device) -> Unit
+    private val onClickItem: (Int, Device) -> Unit,
+    private val onLongClickItem: (Int, Device) -> Unit
 ) : RecyclerView.Adapter<DeviceViewHolder>(
 ) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeviceViewHolder {
         return DeviceViewHolder(
             DeviceItemBinding.inflate(LayoutInflater.from(parent.context), parent, false),
-            onClickItem
+            onClickItem,
+            onLongClickItem
         )
     }
 
@@ -101,7 +103,8 @@ class DeviceAdapter(
 }
 class DeviceViewHolder(
     val binding: DeviceItemBinding,
-    private val onClickItem: (Int, Device) -> Unit
+    private val onClickItem: (Int, Device) -> Unit,
+    private val onLongClickItem: (Int, Device) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(item: Device) = with(binding) {
@@ -121,6 +124,13 @@ class DeviceViewHolder(
                 position,
                 item
             )
+        }
+        binding.root.setOnLongClickListener {
+            onLongClickItem(
+                position,
+                item
+            )
+            return@setOnLongClickListener true
         }
     }
 }

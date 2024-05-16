@@ -47,7 +47,7 @@ class BleListFragment : Fragment() {
     private var scanning = false
     private val SCAN_PERIOD: Long = 10000
     private val handler = android.os.Handler()
-//    lateinit var mGatt : BluetoothGatt
+    var mGatt: BluetoothGatt? = null
 
     var count = 1
 
@@ -81,6 +81,10 @@ class BleListFragment : Fragment() {
                 item.device!!.connectGatt(requireContext(), true, gattCallBack)
 //                mGatt = item.device!!.connectGatt(this, true, gattCallBack)
                 Toast.makeText(requireContext(), "${item.deviceName}에 연결 중입니다...", Toast.LENGTH_LONG).show()
+            },
+            onLongClickItem = { position, item ->
+                mGatt?.disconnect()
+                Toast.makeText(requireContext(), "gatt 연결 해제 완료!", Toast.LENGTH_LONG).show()
             }
         )
     }
@@ -90,8 +94,11 @@ class BleListFragment : Fragment() {
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
 
+            // gatt 초기화
+            mGatt = gatt
             when(newState){
                 BluetoothProfile.STATE_CONNECTING -> {
+
                     Log.d("choco5732", "gatt connecting~")
 
 
@@ -101,6 +108,7 @@ class BleListFragment : Fragment() {
                     gatt?.discoverServices()
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
+                    gatt?.disconnect()
                     gatt?.close()
                     Log.d("choco5732", "gatt disconnected!!!")
 
@@ -111,6 +119,7 @@ class BleListFragment : Fragment() {
                     }
                 }
                 else -> {
+                    gatt?.disconnect()
                     gatt?.close()
 //                    Toast.makeText(this@MainActivity, "연결 실패", Toast.LENGTH_SHORT).show()
                 }
@@ -177,13 +186,8 @@ class BleListFragment : Fragment() {
             gatt: BluetoothGatt?,
             characteristic: BluetoothGattCharacteristic?
         ) {
-            requireActivity().runOnUiThread {
-                state = true
-//                deviceAdapter.reloadUi()
-            }
             super.onCharacteristicChanged(gatt, characteristic)
             val data = characteristic!!.value
-
             val deviceName = gatt?.device?.name
 
             /**
