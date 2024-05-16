@@ -11,13 +11,14 @@
         android:id="@+id/search_ble"
         android:layout_width="120dp"
         android:layout_height="120dp"
+        android:layout_marginTop="15dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/device_recycler_view"
-        app:lottie_rawRes="@raw/robot_lotti"
+        app:lottie_rawRes="@raw/bluetooth_lotti"
         app:lottie_autoPlay="false"
-        app:lottie_repeatCount="1"
+        app:lottie_repeatCount="2"
         app:lottie_loop="true"
         tools:ignore="MissingClass">
     </com.airbnb.lottie.LottieAnimationView>
@@ -27,6 +28,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:listitem="@layout/device_item"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/search_ble">

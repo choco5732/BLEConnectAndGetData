@@ -44,7 +44,7 @@ class BleListFragment : Fragment() {
 
 
     private var scanning = false
-    private val SCAN_PERIOD: Long = 10000
+    private val SCAN_PERIOD: Long = 8500
     private val handler = android.os.Handler()
     var mGatt: BluetoothGatt? = null
 
