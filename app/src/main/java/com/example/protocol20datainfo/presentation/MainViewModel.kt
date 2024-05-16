@@ -19,8 +19,4 @@ class MainViewModel: ViewModel() {
         Log.e("choco", "_data의 값은 : ${_data.value.toString()}")
     }
 
-    fun testFunction(test: String) {
-        _test.postValue(test)
-        Log.d("choco5732", "앙앙!")
-    }
 }

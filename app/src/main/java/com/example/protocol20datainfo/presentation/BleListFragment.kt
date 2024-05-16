@@ -55,19 +55,6 @@ class BleListFragment : Fragment() {
         ViewModelProvider(requireActivity())[MainViewModel::class.java]
     }
 
-//    private val deviceAdapter by lazy {
-//        DeviceAdapter(
-//            deviceList,
-//            onClickItem = { position, item ->
-//                Log.e("choco5732", "클릭한 장치 name : ${item.deviceName}, mac : ${item.deviceMac}")
-//                // gatt 연결!
-//                item.device!!.connectGatt(requireContext(), true, gattCallBack)
-////                mGatt = item.device!!.connectGatt(this, true, gattCallBack)
-//                Toast.makeText(requireContext(), "${item.deviceName}에 연결 중입니다...", Toast.LENGTH_LONG).show()
-//            }
-//        )
-//    }
-
 
     private var deviceAdapter: DeviceAdapter
 
@@ -83,6 +70,7 @@ class BleListFragment : Fragment() {
             },
             onLongClickItem = { position, item ->
                 mGatt?.disconnect()
+                mGatt?.close()
                 Toast.makeText(requireContext(), "gatt 연결 해제 완료!", Toast.LENGTH_LONG).show()
             }
         )
@@ -99,6 +87,10 @@ class BleListFragment : Fragment() {
                 BluetoothProfile.STATE_CONNECTING -> {
 
                     Log.d("choco5732", "gatt connecting~")
+                    requireActivity().runOnUiThread {
+                        deviceAdapter.updateUiForConnect(gatt!!.device.address)
+
+                    }
 
 
                 }
@@ -108,7 +100,6 @@ class BleListFragment : Fragment() {
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     gatt?.disconnect()
-                    gatt?.close()
                     Log.d("choco5732", "gatt disconnected!!!")
 
                     requireActivity().runOnUiThread {
@@ -119,7 +110,6 @@ class BleListFragment : Fragment() {
                 }
                 else -> {
                     gatt?.disconnect()
-                    gatt?.close()
 //                    Toast.makeText(this@MainActivity, "연결 실패", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -264,8 +254,12 @@ class BleListFragment : Fragment() {
 
             Log.d("data", "battery : $battery")
 
+            // 펌웨어 버전
+//            val FirmwareVersion = java.lang.Byte.toUnsignedInt(data[data.size - 6]) * 256 + java.lang.Byte.toUnsignedInt(data[data.size - 5])
+            val FirmwareVersion = data[data.size - 6].toUByte().toInt() * 256 + data[data.size - 5].toUByte().toInt()
 
-//            Log.d("choco5732", data[0]
+            Log.d("data", "펌웨어 버전 : $FirmwareVersion")
+
             var str = String(data)
             Log.d("data", "${count} 번째 불러온 데이터는 :$str")
             count++
@@ -275,7 +269,8 @@ class BleListFragment : Fragment() {
                 convertedProductId2 = String.format("0x%02X ", productId2),
                 time1 = time1, time2 = time2, time3 = time3, time4 = time4, time5 = time5, time6 = time6,
                 temperature = temparature, battery = battery, count = count,
-                deviceName = deviceName
+                deviceName = deviceName,
+                firmwareVersion = FirmwareVersion
                 )
 
             // 뷰모델에 데이터 업데이트

@@ -21,7 +21,8 @@ data class ProtocolData(
     val temperature: Double? = null,
     val battery: Double? = null,
     val count: Int? = null,
-    val deviceName: String? = null
+    val deviceName: String? = null,
+    val firmwareVersion: Int? = null
     ) : Parcelable
 
 

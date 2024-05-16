@@ -58,8 +58,9 @@ class BleInfoFragment : Fragment() {
                 "count : ${data.count}\nstx1 : ${data.stx1}  stx2 : ${data.stx2} \ncommand : ${data.command}\n" +
                         "productId1 : ${data.productId1},  productId2 : ${data.productId2}\n" +
                         "convertedProductId1 : ${data.convertedProductId1}\nconvertedProductId2 : ${data.convertedProductId2}\n" +
-                        "time : ${data.time1?.plus(2000)}년 ${data.time2}월 ${data.time3}일 ${data.time4}시 ${data.time5}분 ${data.time6}초\n" +
-                        "temperature : ${data.temperature}\nbattery level : ${data.battery}"
+                        "${data.time1?.plus(2000)}년 ${data.time2}월 ${data.time3}일 ${data.time4}시 ${data.time5}분 ${data.time6}초\n" +
+                        "temperature : ${data.temperature}\nbattery level : ${data.battery}\n" +
+                        "firmware version : ${data.firmwareVersion}"
         }
 
         test.observe(viewLifecycleOwner) {
