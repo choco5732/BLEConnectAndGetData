@@ -50,11 +50,16 @@ class BleInfoFragment : Fragment() {
     }
 
     private fun initViewModel() = with(viewModel) {
-        data.observe(viewLifecycleOwner) {
+        data.observe(viewLifecycleOwner) { data ->
             Log.d("choco5732","상세 프래그먼트 initViewModel")
-            Log.d("choco5732", "상세 프래그먼트! ${it.toString()}")
-            binding.bleDetailDeviceName.text = it.deviceName
-            binding.bleDetilReceivingData.text = it.toString()
+            Log.d("choco5732", "상세 프래그먼트! ${data.toString()}")
+            binding.bleDetailDeviceName.text = data.deviceName
+            binding.bleDetilReceivingData.text =
+                "count : ${data.count}\nstx1 : ${data.stx1}  stx2 : ${data.stx2} \ncommand : ${data.command}\n" +
+                        "productId1 : ${data.productId1},  productId2 : ${data.productId2}\n" +
+                        "convertedProductId1 : ${data.convertedProductId1}\nconvertedProductId2 : ${data.convertedProductId2}\n" +
+                        "time : ${data.time1?.plus(2000)}년 ${data.time2}월 ${data.time3}일 ${data.time4}시 ${data.time5}분 ${data.time6}초\n" +
+                        "temperature : ${data.temperature}\nbattery level : ${data.battery}"
         }
 
         test.observe(viewLifecycleOwner) {

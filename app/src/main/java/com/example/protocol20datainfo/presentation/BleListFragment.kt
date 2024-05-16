@@ -26,6 +26,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.protocol20datainfo.databinding.FragmentBleListBinding
 import com.example.protocol20datainfo.presentation.MainActivity.Companion.characteristicUuidWriteT10
+import com.example.protocol20datainfo.presentation.MainActivity.Companion.state
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 @SuppressLint("MissingPermission")
@@ -42,7 +47,7 @@ class BleListFragment : Fragment() {
     private var scanning = false
     private val SCAN_PERIOD: Long = 10000
     private val handler = android.os.Handler()
-    lateinit var mGatt : BluetoothGatt
+//    lateinit var mGatt : BluetoothGatt
 
     var count = 1
 
@@ -51,19 +56,34 @@ class BleListFragment : Fragment() {
         ViewModelProvider(requireActivity())[MainViewModel::class.java]
     }
 
-    private val deviceAdapter by lazy {
-        DeviceAdapter(
+//    private val deviceAdapter by lazy {
+//        DeviceAdapter(
+//            deviceList,
+//            onClickItem = { position, item ->
+//                Log.e("choco5732", "클릭한 장치 name : ${item.deviceName}, mac : ${item.deviceMac}")
+//                // gatt 연결!
+//                item.device!!.connectGatt(requireContext(), true, gattCallBack)
+////                mGatt = item.device!!.connectGatt(this, true, gattCallBack)
+//                Toast.makeText(requireContext(), "${item.deviceName}에 연결 중입니다...", Toast.LENGTH_LONG).show()
+//            }
+//        )
+//    }
+
+
+    private var deviceAdapter: DeviceAdapter
+
+    init {
+        deviceAdapter = DeviceAdapter(
             deviceList,
             onClickItem = { position, item ->
                 Log.e("choco5732", "클릭한 장치 name : ${item.deviceName}, mac : ${item.deviceMac}")
                 // gatt 연결!
                 item.device!!.connectGatt(requireContext(), true, gattCallBack)
 //                mGatt = item.device!!.connectGatt(this, true, gattCallBack)
-                Toast.makeText(requireContext(), "${item.deviceName}에 연결 중입니다...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "${item.deviceName}에 연결 중입니다...", Toast.LENGTH_LONG).show()
             }
         )
     }
-
 
     private val gattCallBack = object : BluetoothGattCallback() {
         @SuppressLint("MissingPermission")
@@ -72,18 +92,23 @@ class BleListFragment : Fragment() {
 
             when(newState){
                 BluetoothProfile.STATE_CONNECTING -> {
-//                    Toast.makeText(this@MainActivity, "연결 중입니다...", Toast.LENGTH_SHORT).show()
                     Log.d("choco5732", "gatt connecting~")
+
+
                 }
                 BluetoothProfile.STATE_CONNECTED -> {
-//                    Toast.makeText(this@MainActivity, "${gatt?.device?.name}와(과) 연결 되었습니다!", Toast.LENGTH_SHORT).show()
                     Log.d("choco5732", "gatt connected!")
                     gatt?.discoverServices()
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     gatt?.close()
                     Log.d("choco5732", "gatt disconnected!!!")
-//                    Toast.makeText(this@MainActivity, "연결 실패", Toast.LENGTH_SHORT).show()
+
+                    requireActivity().runOnUiThread {
+                        Toast.makeText(requireContext(), "연결 끊킴!", Toast.LENGTH_SHORT).show()
+                        deviceAdapter.updateUiForDisconnect(gatt!!.device.address)
+
+                    }
                 }
                 else -> {
                     gatt?.close()
@@ -128,7 +153,20 @@ class BleListFragment : Fragment() {
 //                val finaldescriptor = finalCharacteristic.getDescriptor()
                 gatt.setCharacteristicNotification(readCharacteristic, true)
 
-                Toast.makeText(context, "${gatt.device.name} 에 연결되었습니다! \n데이터를 가져오는 중입니다.. \n잠시만 기다려주세요..",Toast.LENGTH_SHORT).show()
+                requireActivity().runOnUiThread {
+                    Toast.makeText(requireContext(), "${gatt.device.name} 에 연결되었습니다! \n데이터를 가져오는 중입니다.. \n잠시만 기다려주세요..", Toast.LENGTH_SHORT).show()
+
+//                    state = true
+                    deviceAdapter.updateUiForConnect(gatt.device.address)
+                }
+
+//                GlobalScope.launch {
+//                    withContext(Dispatchers.Main) {
+//                        Toast.makeText(requireContext(), "${gatt.device.name} 에 연결되었습니다! \n데이터를 가져오는 중입니다.. \n잠시만 기다려주세요..", Toast.LENGTH_SHORT).show()
+//                        // Update UI using updateUiForConnect
+//                        deviceAdapter.updateUiForConnect(gatt.device.name)
+//                    }
+//                }
             } else {
                 Log.d("choco5732" ,"가트 진입 실패!")
             }
@@ -139,6 +177,10 @@ class BleListFragment : Fragment() {
             gatt: BluetoothGatt?,
             characteristic: BluetoothGattCharacteristic?
         ) {
+            requireActivity().runOnUiThread {
+                state = true
+//                deviceAdapter.reloadUi()
+            }
             super.onCharacteristicChanged(gatt, characteristic)
             val data = characteristic!!.value
 
@@ -226,12 +268,13 @@ class BleListFragment : Fragment() {
                 temperature = temparature, battery = battery, count = count,
                 deviceName = deviceName
                 )
+
             // 뷰모델에 데이터 업데이트
             viewModel.updateData(finalData)
 
 
             // write 기능
-            writeAgms()
+//            writeAgms()
 
         }
     }
@@ -274,7 +317,7 @@ class BleListFragment : Fragment() {
                     val deviceInfo = result?.device
 
                     Log.d("choco5732", "mac : ${deviceInfo?.address}, id : ${deviceInfo?.name}")
-                    deviceAdapter.addDevice(Device("${deviceInfo?.name}", "${deviceInfo?.address}", deviceInfo))
+                    deviceAdapter.addDevice(Device("${deviceInfo?.name}", "${deviceInfo?.address}", deviceInfo, false))
                     device = result?.device
 
                     Log.d("choco5732", "onScanResult")

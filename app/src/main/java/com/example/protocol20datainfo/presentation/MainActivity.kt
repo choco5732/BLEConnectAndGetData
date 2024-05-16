@@ -40,6 +40,8 @@ class MainActivity : AppCompatActivity() {
         private const val UUID_CONNECTION_SERVICE_T01 = "e1b40000-ffc4-4daa-a49b-1c92f99072ab"
         private const val UUID_CONNECTION_CHARACTERISTIC_WRITE_T01 = "e1b40002-ffc4-4daa-a49b-1c92f99072ab"
         private const val UUID_CONNECTION_CHARACTERISTIC_READ_T01 = "e1b40001-ffc4-4daa-a49b-1c92f99072ab"
+
+        var state: Boolean = false
     }
 
     lateinit var binding: MainActivityBinding

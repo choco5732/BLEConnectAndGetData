@@ -8,5 +8,6 @@ import kotlinx.parcelize.Parcelize
 data class Device(
     val deviceName : String? = null,
     val deviceMac : String? = null,
-    val device : BluetoothDevice? = null
+    val device : BluetoothDevice? = null,
+    var isConnect : Boolean = false
 ) : Parcelable

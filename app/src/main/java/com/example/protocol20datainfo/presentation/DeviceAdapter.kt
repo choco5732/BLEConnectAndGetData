@@ -1,10 +1,18 @@
 package com.example.protocol20datainfo.presentation
 
+import android.bluetooth.BluetoothDevice
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.protocol20datainfo.R
 import com.example.protocol20datainfo.databinding.DeviceItemBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DeviceAdapter(
     private val deviceList: ArrayList<Device>,
@@ -43,6 +51,52 @@ class DeviceAdapter(
         notifyDataSetChanged()
     }
 
+    fun reloadUi()  {
+        notifyDataSetChanged()
+    }
+
+//    fun updateUiForConnect(mac: String) {
+//        var findPosition = 0
+//        for (i in 0 until deviceList.size) {
+//            if (deviceList[i].deviceMac == mac) {
+//                findPosition = i
+//                Log.d("choco5732", "updateUI 안 : ${deviceList[i].toString()}")
+//                break
+//            }
+//        }
+//        deviceList[findPosition].isConnect = true
+//        Log.d("choco5732", "updateUI 밖 : ${deviceList[findPosition].toString()}")
+//        notifyDataSetChanged()
+//    }
+    fun updateUiForConnect(mac: String) {
+        Log.d("choco5732", "받은 mac은 : $mac")
+        var findPosition = 0
+        for (i in 0 until deviceList.size) {
+            if (deviceList[i].deviceMac == mac) {
+                findPosition = i
+                Log.d("choco5732", "updateUI 안 : ${deviceList[i].toString()}")
+            }
+        }
+
+            deviceList[findPosition].isConnect = true
+            Log.d("choco5732", "updateUI 밖 : ${deviceList[findPosition].toString()}")
+            notifyDataSetChanged()
+
+    }
+
+
+    fun updateUiForDisconnect(mac: String) {
+        var findPosition = 0
+        for (i in 0 until deviceList.size){
+            if (deviceList[i].deviceMac == mac) {
+                findPosition = i
+                break
+            }
+        }
+        deviceList[findPosition].isConnect = false
+        notifyDataSetChanged()
+    }
+
 
 }
 class DeviceViewHolder(
@@ -53,9 +107,16 @@ class DeviceViewHolder(
     fun bind(item: Device) = with(binding) {
         deviceName.text = (item.deviceName)
         deviceMac.text = item.deviceMac
-        bluetoothImg.setImageResource(R.drawable.ic_bluetooth_blue)
+        if (item.isConnect){
+            // true이면, 보라
+            bluetoothImg.setImageResource(R.drawable.ic_bluetooth_purple)
+        } else {
+            // false이면, 파랑
+            bluetoothImg.setImageResource(R.drawable.ic_bluetooth_blue)
+        }
 
         binding.root.setOnClickListener {
+//            bluetoothImg.setImageResource(R.drawable.ic_bluetooth_purple)
             onClickItem(
                 position,
                 item

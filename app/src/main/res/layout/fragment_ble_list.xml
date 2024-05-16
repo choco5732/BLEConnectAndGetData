@@ -6,28 +6,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".presentation.BleListFragment">
 
-    <TextView
-        android:id="@+id/main_hello_tv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/main_text1"
-        android:textColor="@color/black"
-        android:textSize="40dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/search_ble"
-        >
-    </TextView>
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/search_ble"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/main_hello_tv"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/device_recycler_view"
         app:lottie_rawRes="@raw/robot_lotti"
         app:lottie_autoPlay="false"
         app:lottie_repeatCount="1"
