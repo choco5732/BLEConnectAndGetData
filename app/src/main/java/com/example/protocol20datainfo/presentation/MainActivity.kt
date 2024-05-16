@@ -1,30 +1,18 @@
 package com.example.protocol20datainfo.presentation
 
-import android.Manifest
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattCallback
-import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothGattService
-import android.bluetooth.BluetoothManager
-import android.bluetooth.BluetoothProfile
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.animation.AnticipateInterpolator
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
-import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.protocol20datainfo.R
 import com.example.protocol20datainfo.databinding.MainActivityBinding
-import com.google.android.material.tabs.TabLayout
+import com.example.protocol20datainfo.presentation.adapter.MainViewPagerAdapter
 import com.google.android.material.tabs.TabLayoutMediator
-import java.util.UUID
 
 @SuppressLint("MissingPermission")
 class MainActivity : AppCompatActivity() {

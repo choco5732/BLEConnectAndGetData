@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import com.example.protocol20datainfo.databinding.FragmentBleInfoBinding
+import com.example.protocol20datainfo.presentation.viewmodel.MainViewModel
 
 class BleInfoFragment : Fragment() {
 

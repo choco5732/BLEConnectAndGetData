@@ -27,8 +27,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.example.protocol20datainfo.R
+import com.example.protocol20datainfo.data.Device
+import com.example.protocol20datainfo.data.ProtocolData
 import com.example.protocol20datainfo.databinding.FragmentBleListBinding
 import com.example.protocol20datainfo.presentation.MainActivity.Companion.characteristicUuidWriteT10
+import com.example.protocol20datainfo.presentation.adapter.DeviceAdapter
+import com.example.protocol20datainfo.presentation.viewmodel.MainViewModel
 import java.util.Calendar
 import java.util.UUID
 
@@ -44,7 +48,7 @@ class BleListFragment : Fragment() {
 
 
     private var scanning = false
-    private val SCAN_PERIOD: Long = 10000
+    private val SCAN_PERIOD: Long = 8500
     private val handler = android.os.Handler()
     var mGatt: BluetoothGatt? = null
 

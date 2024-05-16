@@ -1,4 +1,4 @@
-package com.example.protocol20datainfo.presentation
+package com.example.protocol20datainfo.data
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

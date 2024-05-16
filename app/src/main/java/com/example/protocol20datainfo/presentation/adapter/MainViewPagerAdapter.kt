@@ -1,9 +1,12 @@
-package com.example.protocol20datainfo.presentation
+package com.example.protocol20datainfo.presentation.adapter
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.protocol20datainfo.R
+import com.example.protocol20datainfo.data.MainTabs
+import com.example.protocol20datainfo.presentation.BleInfoFragment
+import com.example.protocol20datainfo.presentation.BleListFragment
 
 class MainViewPagerAdapter(
     fragmentActivity: FragmentActivity

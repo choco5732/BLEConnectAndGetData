@@ -1,9 +1,10 @@
-package com.example.protocol20datainfo.presentation
+package com.example.protocol20datainfo.presentation.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.protocol20datainfo.data.ProtocolData
 
 class MainViewModel: ViewModel() {
     private val _data: MutableLiveData<ProtocolData> = MutableLiveData()

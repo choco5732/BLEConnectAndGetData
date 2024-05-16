@@ -1,18 +1,12 @@
-package com.example.protocol20datainfo.presentation
+package com.example.protocol20datainfo.presentation.adapter
 
-import android.bluetooth.BluetoothDevice
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.protocol20datainfo.R
+import com.example.protocol20datainfo.data.Device
 import com.example.protocol20datainfo.databinding.DeviceItemBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class DeviceAdapter(
     private val deviceList: ArrayList<Device>,
@@ -42,7 +36,7 @@ class DeviceAdapter(
     // 중복검사 및, 이름이 null아닌 디바이스만 추가
     fun addDevice(item: Device) {
 
-        if(!deviceList.contains(item) && item.deviceName != ("null")) {
+        if(!deviceList.contains(item) && item.deviceName != ("null") && item.deviceName!!.contains("AGMS") ) {
             deviceList.add(item)
             notifyItemInserted(deviceList.size - 1)
         }
