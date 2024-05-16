@@ -14,6 +14,7 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.os.Build
+import android.os.Build.VERSION_CODES.TIRAMISU
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -26,11 +27,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.protocol20datainfo.databinding.FragmentBleListBinding
 import com.example.protocol20datainfo.presentation.MainActivity.Companion.characteristicUuidWriteT10
-import com.example.protocol20datainfo.presentation.MainActivity.Companion.state
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import java.util.Calendar
 import java.util.UUID
 
 @SuppressLint("MissingPermission")
@@ -190,6 +187,14 @@ class BleListFragment : Fragment() {
             val data = characteristic!!.value
             val deviceName = gatt?.device?.name
 
+            // sendRTC
+            val state = data[5]
+            if (state == 0x00.toByte() || state == 0x01.toByte() || state == 0x02.toByte()) {
+                // write 기능
+                writeAgms(gatt!!, sendRtc())
+                Log.d("choco5732", "SEND_RTC!!!")
+            }
+
             /**
              * stx 2바이트
              * productID 2바이트
@@ -278,7 +283,7 @@ class BleListFragment : Fragment() {
 
 
             // write 기능
-//            writeAgms()
+            writeAgms(gatt!!, sendRtc())
 
         }
     }
@@ -395,7 +400,7 @@ class BleListFragment : Fragment() {
         }
     }
 
-    fun writeAgms(gatt: BluetoothGatt, value: Array<Byte>) {
+    fun writeAgms(gatt: BluetoothGatt, value: ByteArray) {
         val services: List<BluetoothGattService> = gatt.services
         lateinit var service : BluetoothGattService
         var found = false
@@ -412,6 +417,125 @@ class BleListFragment : Fragment() {
         val characteristicUuid = UUID.fromString(characteristicUuidWriteT10)
         val writeCharacteristic = service.getCharacteristic(characteristicUuid)
 
+        if (Build.VERSION.SDK_INT >= TIRAMISU) {
+            gatt.writeCharacteristic(writeCharacteristic, value,BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+
+        } else {
+            writeCharacteristic.setValue(value)
+            gatt.writeCharacteristic(writeCharacteristic)
+        }
+
+    }
+
+
+    fun sendRtc(): ByteArray {
+        val rtc = Calendar.getInstance()
+
+        val year = rtc[Calendar.YEAR] - 2000
+        val month = rtc[Calendar.MONTH] + 1
+        val date = rtc[Calendar.DATE]
+
+        val hour24 = rtc[Calendar.HOUR_OF_DAY]
+        val minute = rtc[Calendar.MINUTE]
+        val second = rtc[Calendar.SECOND]
+
+
+        val data = ByteArray(12)
+        data[0] = 0xA0.toByte()
+        data[1] = 0x81.toByte()
+        data[2] = 0x02.toByte()
+        data[3] = 0x04.toByte()
+        data[4] = year.toByte()
+        data[5] = month.toByte()
+        data[6] = date.toByte()
+        data[7] = hour24.toByte()
+        data[8] = minute.toByte()
+        data[9] = second.toByte()
+
+        val crc: Int = check_CRC(data)
+
+        val b_crc = ByteArray(2)
+
+        b_crc[0] = crc.toByte()
+        b_crc[1] = (crc shr 8).toByte()
+
+        data[10] = b_crc[1]
+        data[11] = b_crc[0]
+
+        return data
+    }
+
+    fun sendAgmsTest(state: Byte): ByteArray {
+        val data = ByteArray(12)
+
+        //STX
+        data[0] = 0xA0.toByte()
+        data[1] = 0x81.toByte()
+
+        //CMD
+        data[2] = 0x01.toByte()
+
+        //STATE
+        data[3] = state
+
+        //RTC Time
+        val rtc = Calendar.getInstance() //Get Current Time
+
+        val year = rtc[Calendar.YEAR] - 2000
+        val month = rtc[Calendar.MONTH] + 1
+        val date = rtc[Calendar.DATE]
+
+        val hour24 = rtc[Calendar.HOUR_OF_DAY]
+        val minute = rtc[Calendar.MINUTE]
+        val second = rtc[Calendar.SECOND]
+
+        data[4] = year.toByte()
+        data[5] = month.toByte()
+        data[6] = date.toByte()
+        data[7] = hour24.toByte()
+        data[8] = minute.toByte()
+        data[9] = second.toByte()
+
+        //CRC16
+        val crc: Int = check_CRC(data)
+        val b_crc = ByteArray(2)
+        b_crc[0] = crc.toByte()
+        b_crc[1] = (crc shr 8).toByte()
+
+        data[10] = b_crc[1]
+        data[11] = b_crc[0]
+
+
+        return data
+    }
+
+    fun check_CRC(data: ByteArray): Int {
+        val i_data = IntArray(data.size - 2)
+
+        //        int b_temp=(int)0xFFFF;
+        var temp = 0xFFFF
+        var flag: Int
+
+
+        for (i in i_data.indices) {
+            i_data[i] = java.lang.Byte.toUnsignedInt(data[i])
+        }
+
+        for (i_datum in i_data) {
+            temp = temp xor i_datum
+            for (j in 1..8) {
+                flag = temp and 0x0001
+                temp = temp shr 1
+                if (flag == 1) temp = temp xor 0xA001
+            }
+        }
+
+        val temp2 = temp shr 8
+        temp = (temp shl 8) or temp2
+        temp = temp and 0xFFFF
+
+
+        return temp
     }
 
     private val permissions = arrayOf (
