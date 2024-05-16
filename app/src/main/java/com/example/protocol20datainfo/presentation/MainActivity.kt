@@ -20,7 +20,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.protocol20datainfo.R
 import com.example.protocol20datainfo.databinding.MainActivityBinding
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import java.util.UUID
 
@@ -42,6 +44,11 @@ class MainActivity : AppCompatActivity() {
         private const val UUID_CONNECTION_CHARACTERISTIC_READ_T01 = "e1b40001-ffc4-4daa-a49b-1c92f99072ab"
 
         var state: Boolean = false
+
+        private val tabIcon = arrayListOf(
+            R.drawable.round_bluetooth_searching_24,
+            R.drawable.baseline_assessment_24
+        )
     }
 
     lateinit var binding: MainActivityBinding
@@ -64,7 +71,23 @@ class MainActivity : AppCompatActivity() {
         viewPager.adapter = viewPagerAdapter
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.setText(viewPagerAdapter.getTitle(position))
+//            tab.setIcon(tabIcon[position])
         }.attach()
+
+//        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
+//            override fun onTabSelected(tab: TabLayout.Tab?) {
+////                val icon = when (tab?.position) {
+////                }
+//            }
+//
+//            override fun onTabUnselected(tab: TabLayout.Tab?) {
+//                TODO("Not yet implemented")
+//            }
+//
+//            override fun onTabReselected(tab: TabLayout.Tab?) {
+//                TODO("Not yet implemented")
+//            }
+//        })
 
 
         // 스플래쉬 API 애니메이션 설정

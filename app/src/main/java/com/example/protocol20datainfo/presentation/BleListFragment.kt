@@ -25,6 +25,8 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.widget.ViewPager2
+import com.example.protocol20datainfo.R
 import com.example.protocol20datainfo.databinding.FragmentBleListBinding
 import com.example.protocol20datainfo.presentation.MainActivity.Companion.characteristicUuidWriteT10
 import java.util.Calendar
@@ -164,15 +166,13 @@ class BleListFragment : Fragment() {
 
 //                    state = true
                     deviceAdapter.updateUiForConnect(gatt.device.address)
-                }
 
-//                GlobalScope.launch {
-//                    withContext(Dispatchers.Main) {
-//                        Toast.makeText(requireContext(), "${gatt.device.name} 에 연결되었습니다! \n데이터를 가져오는 중입니다.. \n잠시만 기다려주세요..", Toast.LENGTH_SHORT).show()
-//                        // Update UI using updateUiForConnect
-//                        deviceAdapter.updateUiForConnect(gatt.device.name)
-//                    }
-//                }
+                    val viewPager = activity?.findViewById<ViewPager2>(R.id.view_pager)
+                    viewPager?.let {
+                        it.setCurrentItem(1, true)
+                    }
+
+                }
             } else {
                 Log.d("choco5732" ,"가트 진입 실패!")
             }

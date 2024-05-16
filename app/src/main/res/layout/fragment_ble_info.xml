@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".presentation.BleInfoFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -11,54 +11,52 @@
         android:id="@+id/ble_detail_device_name_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="기기명"
+        android:layout_marginStart="10dp"
+        android:text="Device Name"
+        android:textColor="@color/blue"
         android:textSize="25dp"
         android:textStyle="bold|italic"
-        android:layout_marginStart="10dp"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/ble_detail_device_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="agms_T10..."
+        android:layout_marginStart="20dp"
+        android:text="Unknown"
         android:textSize="23dp"
         android:textStyle="bold"
-        android:layout_marginStart="20dp"
-        android:textColor="@color/blue"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ble_detail_device_name_title"
         app:layout_constraintBottom_toTopOf="@id/ble_detil_receiving_data_title"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ble_detail_device_name_title" />
 
     <TextView
         android:id="@+id/ble_detil_receiving_data_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="들어오는 데이터"
-        android:textStyle="bold|italic"
-        android:textSize="25dp"
         android:layout_marginStart="10dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="Incoming Data"
+        android:textColor="@color/blue"
+        android:textSize="25dp"
+        android:textStyle="bold|italic"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ble_detail_device_name"
-        ></TextView>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ble_detail_device_name"></TextView>
+
     <TextView
         android:id="@+id/ble_detil_receiving_data"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:text="데이터들 ..."
-        android:textColor="@color/blue"
-        android:textSize="23dp"
-        android:textStyle="bold"
         android:layout_marginStart="20dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ble_detil_receiving_data_title"
+        android:text="Wait for Data.."
+        android:textSize="20dp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        ></TextView>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ble_detil_receiving_data_title"></TextView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
