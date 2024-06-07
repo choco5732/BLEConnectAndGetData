@@ -9,7 +9,6 @@ import android.view.animation.AnticipateInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.example.protocol20datainfo.R
 import com.example.protocol20datainfo.databinding.MainActivityBinding
 import com.example.protocol20datainfo.presentation.adapter.MainViewPagerAdapter
 import com.google.android.material.tabs.TabLayoutMediator
@@ -27,16 +26,17 @@ class MainActivity : AppCompatActivity() {
         const val characteristicUuidWriteT10 = "e093f3b5-00a3-a9e5-9eca-40036e0edc24"
         const val characteristicUuidReadT10 = "e093f3b5-00a3-a9e5-9eca-40026e0edc24"
 
+        const val serviceUuidT21 = "e093f3b5-00a3-a9e5-9eca-40016e0edc24"
+        const val characteristicUuidWriteT21 = "e093f3b5-00a3-a9e5-9eca-40036e0edc24"
+        const val characteristicUuidReadT21 = "e093f3b5-00a3-a9e5-9eca-40026e0edc24"
+
         private const val UUID_CONNECTION_SERVICE_T01 = "e1b40000-ffc4-4daa-a49b-1c92f99072ab"
         private const val UUID_CONNECTION_CHARACTERISTIC_WRITE_T01 = "e1b40002-ffc4-4daa-a49b-1c92f99072ab"
         private const val UUID_CONNECTION_CHARACTERISTIC_READ_T01 = "e1b40001-ffc4-4daa-a49b-1c92f99072ab"
 
         var state: Boolean = false
 
-        private val tabIcon = arrayListOf(
-            R.drawable.round_bluetooth_searching_24,
-            R.drawable.baseline_assessment_24
-        )
+
     }
 
     lateinit var binding: MainActivityBinding
