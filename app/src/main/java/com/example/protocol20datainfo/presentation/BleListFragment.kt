@@ -187,21 +187,29 @@ class BleListFragment : Fragment() {
             val data = characteristic!!.value
             val deviceName = gatt?.device?.name
 
-            // send data legth error
-//            writeAgms(gatt!!, makeByteArrayWithState(0x02.toByte()))
+
+            Log.d("choco5732", "commandId  : ${String.format("0x%02X", data[2])}")
+            Log.d("choco5732", "status  : ${String.format("0x%02X", data[3])}")
+
 
             // Check CRC Code
             val crc1 = java.lang.Byte.toUnsignedInt(data[6])
             val crc2 = java.lang.Byte.toUnsignedInt(data[7])
-            Log.d("data", "data[6] : $crc1, data[7] : $crc2")
-            val crc = crc1 * 256 + crc2
+//            val ucrc1 = (data[6]).toUInt()
+//            val ucrc2 = (data[7]).toUInt()
+            Log.d("data", "crc1 : $crc1, crc2 : $crc2")
+//            Log.d("data", "ucrc1 : $ucrc1, ucrc2 : $ucrc2")
+
+            val crc = (crc1 * 256) + crc2
             Log.d("data", "수신된 crc : $crc")
-            val checkCrc = checkCRC2(data)
+
+            val checkCrc = check_CRC2(data)
             Log.d("data", "계산된 crc : $checkCrc")
 
             if (crc != checkCrc) {
                 Log.e("data", "crc 에러 발생!")
                 writeAgms(gatt!!, makeByteArrayWithState(0x01.toByte())) // crc_error
+                return
             }
 
 
@@ -216,8 +224,8 @@ class BleListFragment : Fragment() {
                     // CMD_SEND (0x42)
                     0x42.toByte() -> {
                         val length = java.lang.Byte.toUnsignedInt(data[4])
-//                        val calLength = 8 + length
-                        val calLength = length
+                        val calLength = 8 + length
+//                        val calLength = length
                         if (data.size != calLength) {
                             Log.e("choco5732", "데이터 길이 맞지 않음\nlength = ${data.size}\ncal_length = $calLength")
                             writeAgms(gatt!!, makeByteArrayWithState(0x02.toByte())) // date_length_error
@@ -394,8 +402,6 @@ class BleListFragment : Fragment() {
         val characteristicUuid = UUID.fromString(characteristicUuidWriteT21)
         val writeCharacteristic = service.getCharacteristic(characteristicUuid)
         Log.d("choco5732", "writeCharacteristic : ${writeCharacteristic.uuid.toString()}")
-        Log.d("choco5732", "commandId  : ${String.format("0x%02X", value[2])}")
-        Log.d("choco5732", "status  : ${String.format("0x%02X", value[3])}")
 
         if (Build.VERSION.SDK_INT >= TIRAMISU) {
             gatt.writeCharacteristic(writeCharacteristic, value, BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE)
@@ -444,7 +450,7 @@ class BleListFragment : Fragment() {
             "now time: $year-$month-$date $hour24:$minute:$second"
         )
 
-        val crc: Int = checkCRC2(data)
+        val crc: Int = check_CRC2(data)
 
         data[6] = (crc shr 8).toByte()
         data[7] = crc.toByte()
@@ -467,13 +473,47 @@ class BleListFragment : Fragment() {
         data[6] = 0x00.toByte()
         data[7] = 0x00.toByte()
 
-        val crc: Int = checkCRC2(data)
+        val crc: Int = check_CRC2(data)
 
         data[6] = (crc shr 8).toByte()
         data[7] = crc.toByte()
 
         return data
 
+    }
+
+    fun check_CRC(data: ByteArray): Int {
+        val i_data = IntArray(data.size)
+
+
+        var temp = 0xFFFF
+        var flag: Int
+
+
+        for (i in i_data.indices) {
+            // 6   7
+            if (i == 6 || i == 7) {
+                i_data[i] = java.lang.Byte.toUnsignedInt(0x00.toByte())
+                continue
+            }
+            i_data[i] = java.lang.Byte.toUnsignedInt(data[i])
+        }
+
+        for (i_datum in i_data) {
+            temp = temp xor i_datum
+            for (j in 1..8) {
+                flag = temp and 0x0001
+                temp = temp shr 1
+                if (flag == 1) temp = temp xor 0xA001
+            }
+        }
+
+        val temp2 = temp shr 8
+        temp = (temp shl 8) or temp2
+        temp = temp and 0xFFFF
+
+
+        return temp
     }
 
     fun checkCrc(data: ByteArray): Int {
@@ -530,6 +570,73 @@ class BleListFragment : Fragment() {
         val temp2 = temp shr 8
         temp = (temp shl 8) or temp2
         temp = temp and 0xFFFF
+
+        return temp
+    }
+
+    fun checkCRC4(data: ByteArray): Int {
+        val iData = IntArray(data.size)
+
+        var temp = 0xFFFF
+        var temp2: Int
+        var flag: Int
+
+        for (i in iData.indices) {
+            if (i == 6 || i == 7) {
+                iData[i] = 0x00
+                continue
+            }
+            iData[i] = data[i].toInt() and 0xFF
+        }
+
+        for (iDatum in iData) {
+            temp = temp xor iDatum
+            for (j in 1..8) {
+                flag = temp and 0x0001
+                temp = temp shr 1
+                if (flag == 1) {
+                    temp = temp xor 0xA001
+                }
+            }
+        }
+
+        temp2 = temp shr 8
+        temp = (temp shl 8) or temp2
+        temp = temp and 0xFFFF
+
+        return temp
+    }
+
+    fun check_CRC2(data: ByteArray): Int {
+        val i_data = IntArray(data.size)
+
+
+        var temp = 0xFFFF
+        var flag: Int
+
+
+        for (i in i_data.indices) {
+            // 6   7
+            if (i == 6 || i == 7) {
+                i_data[i] = java.lang.Byte.toUnsignedInt(0x00.toByte())
+                continue
+            }
+            i_data[i] = java.lang.Byte.toUnsignedInt(data[i])
+        }
+
+        for (i_datum in i_data) {
+            temp = temp xor i_datum
+            for (j in 1..8) {
+                flag = temp and 0x0001
+                temp = temp shr 1
+                if (flag == 1) temp = temp xor 0xA001
+            }
+        }
+
+        val temp2 = temp shr 8
+        temp = (temp shl 8) or temp2
+        temp = temp and 0xFFFF
+
 
         return temp
     }
