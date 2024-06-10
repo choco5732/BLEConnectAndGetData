@@ -23,12 +23,12 @@ class MainActivity : AppCompatActivity() {
          *                  * Characteristic UUID: e093f3b5-00a3-a9e5-9eca-40036e0edc24
          */
         const val serviceUuidT10 = "e093f3b5-00a3-a9e5-9eca-40016e0edc24"
-        const val characteristicUuidWriteT10 = "e093f3b5-00a3-a9e5-9eca-40036e0edc24"
         const val characteristicUuidReadT10 = "e093f3b5-00a3-a9e5-9eca-40026e0edc24"
+        const val characteristicUuidWriteT10 = "e093f3b5-00a3-a9e5-9eca-40036e0edc24"
 
         const val serviceUuidT21 = "e093f3b5-00a3-a9e5-9eca-40016e0edc24"
-        const val characteristicUuidWriteT21 = "e093f3b5-00a3-a9e5-9eca-40036e0edc24"
         const val characteristicUuidReadT21 = "e093f3b5-00a3-a9e5-9eca-40026e0edc24"
+        const val characteristicUuidWriteT21 = "e093f3b5-00a3-a9e5-9eca-40036e0edc24";
 
         private const val UUID_CONNECTION_SERVICE_T01 = "e1b40000-ffc4-4daa-a49b-1c92f99072ab"
         private const val UUID_CONNECTION_CHARACTERISTIC_WRITE_T01 = "e1b40002-ffc4-4daa-a49b-1c92f99072ab"
