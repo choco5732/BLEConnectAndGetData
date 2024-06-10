@@ -50,7 +50,7 @@ class BleListFragment : Fragment() {
 
 
     private var scanning = false
-    private val SCAN_PERIOD: Long = 8500
+    private val scanPeriod: Long = 8500
     private val handler = android.os.Handler()
     var mGatt: BluetoothGatt? = null
 
@@ -183,21 +183,27 @@ class BleListFragment : Fragment() {
             val data = characteristic!!.value
             val deviceName = gatt?.device?.name
 
-            //Check CRC Code
+            // send data legthn error
+            writeAgms(gatt!!, makeByteArrayWithState(0x02.toByte()))
+
+            // Check CRC Code
             val crc1 = java.lang.Byte.toUnsignedInt(data[6])
             val crc2 = java.lang.Byte.toUnsignedInt(data[7])
+            Log.d("data", "data[6] : $crc1, data[7] : $crc2")
             val crc = crc1 * 256 + crc2
             Log.d("data", "수신된 crc : $crc")
             val checkCrc = checkCrc(data)
             Log.d("data", "계산된 crc : $checkCrc")
 
             if (crc != checkCrc) {
-                Log.d("data", "crc 에러 발생!")
-                writeAgms(gatt!!, makeByteArrayWithState(0x01.toByte())) // crc_error
+                Log.e("data", "crc 에러 발생!")
+//                writeAgms(gatt!!, makeByteArrayWithState(0x01.toByte())) // crc_error
             }
 
             if (data[0] == 0xA0.toByte() && data[1] == 0x81.toByte()) {
+                Log.d("data", "data[0] : ${data[0]}, 0xA0.toByte() = ${0xA0.toByte()}, data[1] : ${data[1]}, 0x81.toByte() = ${0x81.toByte()}")
                 val commandId = data[2]
+                Log.d("data", "data[2] = ${data[2]}, 0x42.toByte() = ${0x42.toByte()} ")
 
                 when (commandId) {
                     // CMD_SEND
@@ -206,9 +212,90 @@ class BleListFragment : Fragment() {
                         val calLength = 8 + length
                         if (data.size != calLength) {
                             Log.e("choco5732", "데이터 길이 맞지 않음\nlength = ${data.size}\ncal_length = $calLength")
-                            writeAgms(gatt!!, makeByteArrayWithState(0x02.toByte())) // date_length_error
+//                            writeAgms(gatt!!, makeByteArrayWithState(0x02.toByte())) // date_length_error
                         } else {
 
+                            // 데이터 받아오기
+
+
+                            val stx1 = data[0]
+                            val stx2 = data[1]
+                            Log.d("data", "stx1 : ${stx1}, stx2: ${stx2}")
+
+                            val commandId = data[2]
+                            val status = data[3]
+                            Log.d("data", "commandId : ${commandId}")
+                            // printf("%02X\n", 10);   // 출력 (앞의 빈자리를 0으로 채우기): 0A
+                            Log.d("data", "status : ${status}" )
+                            // 왜 0x%02X라는 작업을 포맷하는가? 오늘 파일이 16진수인가?
+
+                            Log.d("data", "data의 size : ${data.size}")
+                            val length = data[4]
+                            Log.d("data", "length : $length")
+
+                            val nDataLength =
+                                (java.lang.Byte.toUnsignedInt(data[4]) - 10) / 6
+
+                            val reversed = data[5]
+                            Log.d("data", "reversed : $reversed")
+
+                            val chc1 = data[6]
+                            val chc2 = data[7]
+                            Log.d("data", "chc1 : $chc1, chc2 : $chc2")
+
+
+                            val time1 = data[8]
+                            val time2 = data[9]
+                            val time3 = data[10]
+                            val time4 = data[11]
+                            val time5 = data[12]
+                            val time6 = data[13]
+
+                            Log.d("data", "time : 20${time1}년 ${time2}월 ${time3}일 ${time4}시 ${time5}분 ${time6}초 ")
+
+                            // 배터리
+                            val batteryLevel =
+                                java.lang.Byte.toUnsignedInt(data[14]) + (java.lang.Byte.toUnsignedInt(data[15]) / 100.0f * 100).roundToInt() / 100.0
+
+                            val decimalFormat = DecimalFormat("#.00")
+                            val battery = decimalFormat.format(batteryLevel)
+
+                            Log.d("data", "battery : $battery")
+
+                            // 온도
+                            val temparature =
+                                java.lang.Byte.toUnsignedInt(data[16]) + (java.lang.Byte.toUnsignedInt(data[17]) / 100.0f * 100).roundToInt() / 100.0
+
+                            val temperature = java.lang.Byte.toUnsignedInt(data[16])
+
+                            Log.d("data", "temperature : $temparature")
+
+                            // we1, we2
+
+                            val we1a = data[18]
+                            val we1b = data[19]
+                            // val we1c = data[20]
+                            // val we2a = data[21]
+                            // val we2b = data[22]
+                            // val we2c = data[23]
+                            Log.e("data", "WEO 1 Address : $we1a : $we1b : ")
+                            // Log.e("data", "WEO 2 Address : $we2a : $we2b : $we2c")
+
+
+                            var str = String(data)
+                            Log.d("data", "${count} 번째 불러온 데이터는 :$str")
+                            count++
+                            val finalData = ProtocolData(
+                                stx1 = stx1, stx2 = stx2, command = commandId,
+                                status = status, length = length, reversed = reversed,
+                                time1 = time1, time2 = time2, time3 = time3, time4 = time4, time5 = time5, time6 = time6,
+                                temperature = temparature, battery = battery.toDouble(), count = count,
+                                deviceName = deviceName
+                            )
+
+                            // 뷰모델에 데이터 업데이트
+                            viewModel.updateData(finalData)
+                            writeAgms(gatt!!, makeByteArrayWithState(0x00.toByte()))
                         }
                     }
                     // CMD_RTC
@@ -226,91 +313,11 @@ class BleListFragment : Fragment() {
 
 
 
+            } else {
+                Log.e("data", "start code Error!")
             }
 
 
-
-            val stx1 = data[0]
-            val stx2 = data[1]
-            Log.d("data", "stx1 : ${stx1}, stx2: ${stx2}")
-
-            val commandId = data[2]
-            val status = data[3]
-            Log.d("data", "commandId : ${commandId}")
-//            printf("%02X\n", 10);   // 출력 (앞의 빈자리를 0으로 채우기): 0A
-            Log.d("data", "status : ${status}" )
-            // 왜 0x%02X라는 작업을 포맷하는가? 오늘 파일이 16진수인가?
-
-            Log.d("data", "data의 size : ${data.size}")
-            val length = data[4]
-            Log.d("data", "length : $length")
-
-            val nDataLength =
-                (java.lang.Byte.toUnsignedInt(data[4]) - 10) / 6
-
-            val reversed = data[5]
-            Log.d("data", "reversed : $reversed")
-
-            val chc1 = data[6]
-            val chc2 = data[7]
-            Log.d("data", "chc1 : $chc1, chc2 : $chc2")
-
-
-            val time1 = data[8]
-            val time2 = data[9]
-            val time3 = data[10]
-            val time4 = data[11]
-            val time5 = data[12]
-            val time6 = data[13]
-
-            Log.d("data", "time : 20${time1}년 ${time2}월 ${time3}일 ${time4}시 ${time5}분 ${time6}초 ")
-
-            // 배터리
-            val batteryLevel =
-                java.lang.Byte.toUnsignedInt(data[14]) + (java.lang.Byte.toUnsignedInt(data[15]) / 100.0f * 100).roundToInt() / 100.0
-
-            val decimalFormat = DecimalFormat("#.00")
-            val battery = decimalFormat.format(batteryLevel)
-
-            Log.d("data", "battery : $battery")
-
-            // 온도
-            val temparature =
-                java.lang.Byte.toUnsignedInt(data[16]) + (java.lang.Byte.toUnsignedInt(data[17]) / 100.0f * 100).roundToInt() / 100.0
-
-            val temperature = java.lang.Byte.toUnsignedInt(data[16])
-
-            Log.d("data", "temperature : $temparature")
-
-            // we1, we2
-
-            val we1a = data[18]
-            val we1b = data[19]
-//            val we1c = data[20]
-//            val we2a = data[21]
-//            val we2b = data[22]
-//            val we2c = data[23]
-            Log.e("data", "WEO 1 Address : $we1a : $we1b : ")
-//            Log.e("data", "WEO 2 Address : $we2a : $we2b : $we2c")
-
-
-            var str = String(data)
-            Log.d("data", "${count} 번째 불러온 데이터는 :$str")
-            count++
-            val finalData = ProtocolData(
-                stx1 = stx1, stx2 = stx2, command = commandId,
-                status = status, length = length, reversed = reversed,
-                time1 = time1, time2 = time2, time3 = time3, time4 = time4, time5 = time5, time6 = time6,
-                temperature = temparature, battery = battery.toDouble(), count = count,
-                deviceName = deviceName
-                )
-
-            // 뷰모델에 데이터 업데이트
-            viewModel.updateData(finalData)
-
-
-            // write 기능
-//            writeAgms(gatt!!, sendRtc())
 
         }
     }
@@ -437,7 +444,7 @@ class BleListFragment : Fragment() {
                 scanning = false
                 scanner.stopScan(callback)
                 Toast.makeText(requireContext(), "스캔 종료 ", Toast.LENGTH_SHORT).show()
-            }, SCAN_PERIOD)
+            }, scanPeriod)
             scanning = true
             scanner.startScan(callback)
             Toast.makeText(requireContext(), "스캔이 시작됩니다. ", Toast.LENGTH_SHORT).show()
@@ -472,7 +479,6 @@ class BleListFragment : Fragment() {
             writeCharacteristic.setValue(value)
             gatt.writeCharacteristic(writeCharacteristic)
         }
-
     }
 
 
@@ -562,14 +568,12 @@ class BleListFragment : Fragment() {
         return data
     }
 
+
     fun checkCrc(data: ByteArray): Int {
         val i_data = IntArray(data.size)
-
-        //        int b_temp=(int)0xFFFF;
         var temp = 0xFFFF
+        val temp2: Int
         var flag: Int
-
-
         for (i in i_data.indices) {
             if (i == 6 || i == 7) {
                 i_data[i] = java.lang.Byte.toUnsignedInt(0x00.toByte())
@@ -577,8 +581,6 @@ class BleListFragment : Fragment() {
             }
             i_data[i] = java.lang.Byte.toUnsignedInt(data[i])
         }
-
-
         for (i_datum in i_data) {
             temp = temp xor i_datum
             for (j in 1..8) {
@@ -587,12 +589,9 @@ class BleListFragment : Fragment() {
                 if (flag == 1) temp = temp xor 0xA001
             }
         }
-
-        val temp2 = temp shr 8
-        temp = (temp shl 8) or temp2
+        temp2 = temp shr 8
+        temp = temp shl 8 or temp2
         temp = temp and 0xFFFF
-
-
         return temp
     }
 

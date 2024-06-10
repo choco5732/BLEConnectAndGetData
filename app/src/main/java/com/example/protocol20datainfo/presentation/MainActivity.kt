@@ -59,23 +59,8 @@ class MainActivity : AppCompatActivity() {
         viewPager.adapter = viewPagerAdapter
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.setText(viewPagerAdapter.getTitle(position))
-//            tab.setIcon(tabIcon[position])
         }.attach()
 
-//        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
-//            override fun onTabSelected(tab: TabLayout.Tab?) {
-////                val icon = when (tab?.position) {
-////                }
-//            }
-//
-//            override fun onTabUnselected(tab: TabLayout.Tab?) {
-//                TODO("Not yet implemented")
-//            }
-//
-//            override fun onTabReselected(tab: TabLayout.Tab?) {
-//                TODO("Not yet implemented")
-//            }
-//        })
 
 
         // 스플래쉬 API 애니메이션 설정
