@@ -449,6 +449,8 @@ class BleListFragment : Fragment() {
         data[6] = (crc shr 8).toByte()
         data[7] = crc.toByte()
 
+        Log.d("sendRTC", "in sendRTC data6 :${data[6]}, data7 :${data[7]}")
+
 
         return data
     }
