@@ -94,18 +94,17 @@ class BleListFragment : Fragment() {
             mGatt = gatt
             when(newState){
                 BluetoothProfile.STATE_CONNECTING -> {
-
                     Log.d("choco5732", "gatt connecting~")
                     requireActivity().runOnUiThread {
                         deviceAdapter.updateUiForConnect(gatt!!.device.address)
-
                     }
-
-
                 }
                 BluetoothProfile.STATE_CONNECTED -> {
                     Log.d("choco5732", "gatt connected!")
-                    gatt?.discoverServices()
+                    gatt?.requestMtu(517)
+                    // 항상 true가 나오는건 아니다.
+                    // 따라서 false일 경우 다시 connect하는 로직을 추후에 작성하자.
+
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     gatt?.disconnect()
@@ -114,7 +113,6 @@ class BleListFragment : Fragment() {
                     requireActivity().runOnUiThread {
                         Toast.makeText(requireContext(), "연결 끊킴!", Toast.LENGTH_SHORT).show()
                         deviceAdapter.updateUiForDisconnect(gatt!!.device.address)
-
                     }
                 }
                 else -> {
@@ -190,6 +188,8 @@ class BleListFragment : Fragment() {
 
             Log.d("choco5732", "commandId  : ${String.format("0x%02X", data[2])}")
             Log.d("choco5732", "status  : ${String.format("0x%02X", data[3])}")
+            Log.e("choco5732", "데이터 size : ${data.size}")
+            Log.e("choco5732", "data[4] length : ${java.lang.Byte.toUnsignedInt(data[4]) + 8}")
 
 
             // Check CRC Code
@@ -206,10 +206,13 @@ class BleListFragment : Fragment() {
             val checkCrc = check_CRC2(data)
             Log.d("data", "계산된 crc : $checkCrc")
 
+            // crc 안 맞으면 crc 에러 응답
             if (crc != checkCrc) {
                 Log.e("data", "crc 에러 발생!")
                 writeAgms(gatt!!, makeByteArrayWithState(0x01.toByte())) // crc_error
                 return
+            } else {
+                Log.e("data", "=== crc 일치! ===")
             }
 
 
@@ -218,21 +221,22 @@ class BleListFragment : Fragment() {
                     "data[0] : ${String.format("0x%02X", data[0])},  0xA0\n" +
                         "data[1] : ${String.format("0x%02X", data[1])},  0x81")
                 val commandId = data[2]
-                Log.d("data", "data[2] commandId = ${String.format("0x%02X", data[2])}")
+                Log.d("data", "data[2] commandId converted = ${0x42.toByte()}")
+                Log.d("data", "data[2] commandId = ${data[2]}")
 
                 when (commandId) {
                     // CMD_SEND (0x42)
                     0x42.toByte() -> {
                         val length = java.lang.Byte.toUnsignedInt(data[4])
                         val calLength = 8 + length
-//                        val calLength = length
                         if (data.size != calLength) {
-                            Log.e("choco5732", "데이터 길이 맞지 않음\nlength = ${data.size}\ncal_length = $calLength")
+                            Log.e("choco5732", "데이터 길이 맞지 않음\nlength = ${data.size}\ncal_length = ${calLength}")
                             writeAgms(gatt!!, makeByteArrayWithState(0x02.toByte())) // date_length_error
 //                            receiveData(data, deviceName)
-//                            writeAgms(gatt!!, makeByteArrayWithState(0x00.toByte()))
                         } else {
                             // 데이터 받아오기
+
+                            Log.e("choco5732", "=== 데이터 길이 일치! === \nlength = ${data.size}\ncal_length = ${calLength}")
                             receiveData(data, deviceName)
                             val checker = receiveData(data, deviceName)
                             if (checker != -1) {
@@ -242,7 +246,6 @@ class BleListFragment : Fragment() {
                             }
                         }
                     }
-
 
                     // CMD_RTC (0x41)
                     0x41.toByte() -> {
@@ -259,14 +262,17 @@ class BleListFragment : Fragment() {
                     }
                 }
 
-
-
             } else {
                 Log.e("data", "start code Error!")
             }
 
 //            receiveData(data, deviceName)
 
+        }
+
+        override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
+            super.onMtuChanged(gatt, mtu, status)
+            gatt?.discoverServices();
         }
     }
 
@@ -383,7 +389,7 @@ class BleListFragment : Fragment() {
     }
 
     fun writeAgms(gatt: BluetoothGatt, value: ByteArray) {
-        Log.d("choco5732", "writeAgms Running!")
+        Log.d("choco5732", "writeAgms 실행됨!")
         val services: List<BluetoothGattService> = gatt.services
         lateinit var service : BluetoothGattService
         var found = false
@@ -397,23 +403,27 @@ class BleListFragment : Fragment() {
             i++
         }
 
-        Log.d("choco5732", "service : ${service.uuid.toString()}")
+        Log.d("choco5732", "in writeAgms - service : ${service.uuid.toString()}")
 
         val characteristicUuid = UUID.fromString(characteristicUuidWriteT21)
         val writeCharacteristic = service.getCharacteristic(characteristicUuid)
-        Log.d("choco5732", "writeCharacteristic : ${writeCharacteristic.uuid.toString()}")
+        Log.d("choco5732", "in writeAgms - writeCharacteristic : ${writeCharacteristic.uuid.toString()}")
 
         if (Build.VERSION.SDK_INT >= TIRAMISU) {
-            gatt.writeCharacteristic(writeCharacteristic, value, BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE)
+            gatt.writeCharacteristic(writeCharacteristic, value, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+            Log.d("choco5732", "티라미수 이상 버전 write")
+//            gatt.writeCharacteristic(writeCharacteristic, value, BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE)
         } else {
             writeCharacteristic.setValue(value)
             gatt.writeCharacteristic(writeCharacteristic)
+            Log.d("choco5732", "기존 버전 write")
+
         }
     }
 
 
     fun sendRtc(): ByteArray {
-        Log.d("choco5732", "sendRTC Running!!")
+        Log.d("choco5732", "sendRTC 호출!!")
         val rtc = Calendar.getInstance()
 
         val year = rtc[Calendar.YEAR] - 2000
@@ -446,7 +456,6 @@ class BleListFragment : Fragment() {
 
         Log.e(
              "choco5732",
-
             "now time: $year-$month-$date $hour24:$minute:$second"
         )
 
@@ -478,8 +487,9 @@ class BleListFragment : Fragment() {
         data[6] = (crc shr 8).toByte()
         data[7] = crc.toByte()
 
-        return data
+        Log.e("data", "makeByteArrayWithState : ${String.format("0x%02X", state)}")
 
+        return data
     }
 
     fun check_CRC(data: ByteArray): Int {
@@ -615,7 +625,7 @@ class BleListFragment : Fragment() {
         var flag: Int
 
 
-        for (i in i_data.indices) {
+        for (i in 0 until i_data.size) {
             // 6   7
             if (i == 6 || i == 7) {
                 i_data[i] = java.lang.Byte.toUnsignedInt(0x00.toByte())
@@ -681,6 +691,10 @@ class BleListFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun receiveData(data: ByteArray, deviceName: String?) : Int {
+        // 카운트
+        Log.d("data", "${count} 번째 불러온 데이터")
+        count++
+
         // 데이터 받아오기
         val stx1 = data[0]
         val stx2 = data[1]
@@ -718,20 +732,20 @@ class BleListFragment : Fragment() {
         Log.d("data", "time : 20${time1}년 ${time2}월 ${time3}일 ${time4}시 ${time5}분 ${time6}초 ")
 
 
-        val zoneid = ZoneId.of("Asia/Seoul")
-        val lData_StartTime: Long =
-            LocalDateTime.of(time1.toInt(), time2.toInt(), time3.toInt(), time4.toInt(), time5.toInt(), time6.toInt()).atZone(zoneid).toInstant()
+        val zoneId = ZoneId.of("Asia/Seoul")
+        val startTime: Long =
+            LocalDateTime.of(time1.toInt(), time2.toInt(), time3.toInt(), time4.toInt(), time5.toInt(), time6.toInt()).atZone(zoneId).toInstant()
                 .toEpochMilli()
 
-        val lTime_Now = LocalDateTime.now().atZone(zoneid).toInstant().toEpochMilli()
-        val lTime_LastTime: Long =
-            lData_StartTime + (1000 * 10.toLong() * nDataLength)
-        val lDta_CheckTime: Long = lTime_Now + 60 * 1000 * 10
+        val now = LocalDateTime.now().atZone(zoneId).toInstant().toEpochMilli()
+        val lastTime: Long =
+            startTime + (1000 * 10.toLong() * nDataLength)
+        val checkTime: Long = now + 60 * 1000 * 10
 
 
 
-        //time error check
-        if (lTime_LastTime > lDta_CheckTime) {
+        // time error check
+        if (lastTime > checkTime) {
             Log.e("data", "Time Check Error")
             return -1
         }
@@ -758,17 +772,17 @@ class BleListFragment : Fragment() {
 
         val we1a = data[18]
         val we1b = data[19]
-        // val we1c = data[20]
-        // val we2a = data[21]
-        // val we2b = data[22]
-        // val we2c = data[23]
-        Log.e("data", "WEO 1 Address : $we1a : $we1b : ")
-        // Log.e("data", "WEO 2 Address : $we2a : $we2b : $we2c")
+        val we1c = data[20]
+        val we2a = data[21]
+        val we2b = data[22]
+        val we2c = data[23]
+        Log.e("data", "WEO 1 Address : $we1a : $we1b : $we1c")
+        Log.e("data", "WEO 2 Address : $we2a : $we2b : $we2c")
+
+        converter(we1a, we1b, we1c)
 
 
-        var str = String(data)
-        Log.d("data", "${count} 번째 불러온 데이터는 :$str")
-        count++
+
         val finalData = ProtocolData(
             stx1 = stx1, stx2 = stx2, command = commandId,
             status = status, length = length, reversed = reversed,
@@ -780,6 +794,12 @@ class BleListFragment : Fragment() {
         // 뷰모델에 데이터 업데이트
         viewModel.updateData(finalData)
         return 0
+    }
+
+    private fun converter(we1a: Byte, we1b: Byte, we1c: Byte) {
+        Log.d("data", "we1a : ${we1a}, we1a converted : ${Integer.toBinaryString(we1a.toInt())}")
+        Log.d("data", "we1b : ${we1b}, we1b converted : ${Integer.toBinaryString(we1b.toInt())}")
+        Log.d("data", "we1c : ${we1c}, we1c converted : ${Integer.toBinaryString(we1c.toInt())}")
     }
 }
 
