@@ -82,6 +82,7 @@ class BleListFragment : Fragment() {
                 mGatt?.close()
                 Toast.makeText(requireContext(), "gatt 연결 해제 완료!", Toast.LENGTH_LONG).show()
             }
+
         )
     }
 
@@ -173,9 +174,8 @@ class BleListFragment : Fragment() {
             } else {
                 Log.d("choco5732" ,"가트 진입 실패!")
             }
-
-
         }
+
         @RequiresApi(Build.VERSION_CODES.O)
         override fun onCharacteristicChanged(
             gatt: BluetoothGatt?,
@@ -232,7 +232,6 @@ class BleListFragment : Fragment() {
                         if (data.size != calLength) {
                             Log.e("choco5732", "데이터 길이 맞지 않음\nlength = ${data.size}\ncal_length = ${calLength}")
                             writeAgms(gatt!!, makeByteArrayWithState(0x02.toByte())) // date_length_error
-//                            receiveData(data, deviceName)
                         } else {
                             // 데이터 받아오기
 
@@ -265,9 +264,6 @@ class BleListFragment : Fragment() {
             } else {
                 Log.e("data", "start code Error!")
             }
-
-//            receiveData(data, deviceName)
-
         }
 
         override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
@@ -714,8 +710,8 @@ class BleListFragment : Fragment() {
         val nDataLength =
             (java.lang.Byte.toUnsignedInt(data[4]) - 10) / 6
 
-        val reversed = data[5]
-        Log.d("data", "reversed : $reversed")
+        val reserved = data[5]
+        Log.d("data", "reversed : $reserved")
 
         val chc1 = data[6]
         val chc2 = data[7]
@@ -779,16 +775,18 @@ class BleListFragment : Fragment() {
         Log.e("data", "WEO 1 Address : $we1a : $we1b : $we1c")
         Log.e("data", "WEO 2 Address : $we2a : $we2b : $we2c")
 
-        converter(we1a, we1b, we1c)
+        val weo1 = converter(we1a, we1b, we1c)
+        val weo2 = converter(we2a, we2b, we2c)
 
 
 
         val finalData = ProtocolData(
             stx1 = stx1, stx2 = stx2, command = commandId,
-            status = status, length = length, reversed = reversed,
+            status = status, length = length, reserved = reserved,
             time1 = time1, time2 = time2, time3 = time3, time4 = time4, time5 = time5, time6 = time6,
             temperature = temparature, battery = battery.toDouble(), count = count,
-            deviceName = deviceName
+            deviceName = deviceName,
+            weo1 = weo1, weo2 = weo2
         )
 
         // 뷰모델에 데이터 업데이트
@@ -796,10 +794,25 @@ class BleListFragment : Fragment() {
         return 0
     }
 
-    private fun converter(we1a: Byte, we1b: Byte, we1c: Byte) {
+    private fun converter(we1a: Byte, we1b: Byte, we1c: Byte): String {
         Log.d("data", "we1a : ${we1a}, we1a converted : ${Integer.toBinaryString(we1a.toInt())}")
         Log.d("data", "we1b : ${we1b}, we1b converted : ${Integer.toBinaryString(we1b.toInt())}")
+        Log.d("data", "we1b pad : ${Integer.toBinaryString(we1b.toInt()).padStart(8, '0')}")
         Log.d("data", "we1c : ${we1c}, we1c converted : ${Integer.toBinaryString(we1c.toInt())}")
+        val test = Integer.toBinaryString(we1a.toInt())
+        val paddedTest = test.padStart(8, '0')
+        val test2 = Integer.toBinaryString(we1b.toInt())
+        val paddedTest2 = test2.padStart(8, '0')
+        Log.d("data", "weo1 : ${we1c}, we1a + we1b : ${test + test2}")
+        Log.d("data", "weo1 pad : ${we1c}, we1a + we1b : ${paddedTest + paddedTest2}")
+
+        val jisu = (paddedTest + paddedTest2).drop(1)
+        Log.d("data", "jisu : $jisu")
+        val convertedJisu = jisu.toInt(radix = 2)
+        Log.d("data", "converted jisu : $convertedJisu")
+        val result = "$convertedJisu.$we1c"
+        Log.d("data", "result = $result")
+        return result
     }
 }
 

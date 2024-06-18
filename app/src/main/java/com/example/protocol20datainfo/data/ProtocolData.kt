@@ -10,7 +10,7 @@ data class ProtocolData(
     val command: Byte? = null,
     val status: Byte? = null,
     val length: Byte? = null,
-    val reversed: Byte? = null,
+    val reserved: Byte? = null,
     val chc: Byte? = null,
     val time1: Byte? = null,
     val time2: Byte? = null,
@@ -22,6 +22,8 @@ data class ProtocolData(
     val battery: Double? = null,
     val count: Int? = null,
     val deviceName: String? = null,
+    val weo1: String? = null,
+    val weo2: String? = null
     ) : Parcelable
 
 
