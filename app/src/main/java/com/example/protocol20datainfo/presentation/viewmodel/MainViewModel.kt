@@ -18,4 +18,6 @@ class MainViewModel: ViewModel() {
         _data.postValue(data)
         Log.e("choco", "_data의 값은 : ${_data.value.toString()}")
     }
+
+
 }

@@ -56,7 +56,6 @@ class BleInfoFragment : Fragment() {
             Log.d("choco5732", "상세 프래그먼트! ${data.toString()}")
             binding.bleDetailDeviceName.text = data.deviceName
             binding.bleDetilReceivingData.text =
-
                 "count : ${data.count}\nstx1 : ${String.format("0x%02X", data.stx1)}  stx2 : ${String.format("0x%02X", data.stx2)} " +
                         "\ncommandId : ${String.format("0x%02X", data.command)}\n" +
                         "status : ${String.format("0x%02X", data.status)}\n" +

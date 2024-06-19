@@ -16,7 +16,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/device_recycler_view"
-        app:lottie_rawRes="@raw/bluetooth_lotti"
+        app:lottie_rawRes="@raw/rectangle_lotti"
         app:lottie_autoPlay="false"
         app:lottie_repeatCount="2"
         app:lottie_loop="true"

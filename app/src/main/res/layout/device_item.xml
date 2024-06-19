@@ -13,18 +13,19 @@
         android:layout_margin="30dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/ic_bluetooth_blue" />
+        tools:src="@drawable/agms_recyclerview_logo" />
 
     <TextView
         android:id="@+id/device_name"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="20dp"
         android:text="기기명"
         android:textColor="@color/black"
         android:textSize="17sp"
         android:textStyle="bold"
         android:maxLines="3"
+        android:layout_marginTop="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/bluetooth_img"
@@ -34,7 +35,7 @@
         android:id="@+id/device_mac"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="20dp"
         android:text="기기 맥 어드레스"
         app:layout_constraintStart_toEndOf="@+id/bluetooth_img"
         app:layout_constraintTop_toBottomOf="@+id/device_name" />

@@ -169,7 +169,6 @@ class BleListFragment : Fragment() {
                     viewPager?.let {
                         it.setCurrentItem(1, true)
                     }
-
                 }
             } else {
                 Log.d("choco5732" ,"가트 진입 실패!")

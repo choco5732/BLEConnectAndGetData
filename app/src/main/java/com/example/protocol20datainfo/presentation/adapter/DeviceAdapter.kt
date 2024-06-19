@@ -106,14 +106,14 @@ class DeviceViewHolder(
         deviceMac.text = item.deviceMac
         if (item.isConnect){
             // true이면, 보라
-            bluetoothImg.setImageResource(R.drawable.ic_bluetooth_purple)
+            bluetoothImg.setImageResource(R.drawable.agms_recyclerview_logo)
         } else {
             // false이면, 파랑
-            bluetoothImg.setImageResource(R.drawable.ic_bluetooth_blue)
+            bluetoothImg.setImageResource(R.drawable.agms_recyclerview_logo)
         }
 
         binding.root.setOnClickListener {
-//            bluetoothImg.setImageResource(R.drawable.ic_bluetooth_purple)
+            bluetoothImg.setImageResource(R.drawable.agms_recyclerview_logo)
             onClickItem(
                 position,
                 item
