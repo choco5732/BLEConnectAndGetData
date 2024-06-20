@@ -4,10 +4,8 @@
     <style name="Theme.Protocol20DataInfo" parent="Theme.AppCompat.DayNight.NoActionBar" />
 
     <style name="Theme.Protocol20DataInfo.SplashScreen" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/uxn_logo_white</item>
-<!--        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>-->
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-        <item name="windowSplashScreenAnimationDuration">5000</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/photoshop</item>
+        <item name="windowSplashScreenAnimationDuration">100</item>
         <item name="postSplashScreenTheme">@style/Theme.Protocol20DataInfo</item>
     </style>
 </resources>

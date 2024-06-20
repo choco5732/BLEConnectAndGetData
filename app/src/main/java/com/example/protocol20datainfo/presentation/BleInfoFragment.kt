@@ -56,11 +56,14 @@ class BleInfoFragment : Fragment() {
             Log.d("choco5732", "상세 프래그먼트! ${data.toString()}")
             binding.bleDetailDeviceName.text = data.deviceName
             binding.bleDetilReceivingData.text =
-                "count : ${data.count}\nstx1 : ${data.stx1}  stx2 : ${data.stx2} \ncommandId : ${data.command}\n" +
-                        "status : ${data.status}\n" +
-                        "length : ${data.length} \nreversed : ${data.reversed} \n " +
+                "count : ${data.count}\nstx1 : ${String.format("0x%02X", data.stx1)}  stx2 : ${String.format("0x%02X", data.stx2)} " +
+                        "\ncommandId : ${String.format("0x%02X", data.command)}\n" +
+                        "status : ${String.format("0x%02X", data.status)}\n" +
+                        "length : ${java.lang.Byte.toUnsignedInt(data.length!!.toByte()) + 8 } \nreserved : ${data.reserved} \n " +
                         "${data.time1?.plus(2000)}년 ${data.time2}월 ${data.time3}일 ${data.time4}시 ${data.time5}분 ${data.time6}초\n" +
-                        "temperature : ${data.temperature}\nbattery level : ${data.battery}\n"
+                        "temperature : ${data.temperature}\n" +
+                        "battery level : ${data.battery}\n" +
+                        "weo1 : ${data.weo1}  weo2 : ${data.weo2}"
         }
 
         test.observe(viewLifecycleOwner) {

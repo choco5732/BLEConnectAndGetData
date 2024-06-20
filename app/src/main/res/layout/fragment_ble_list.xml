@@ -4,21 +4,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".presentation.BleListFragment">
+    tools:context=".presentation.BleListFragment"
+    android:background="@color/agms_purple_200"
+    >
 
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/search_ble"
-        android:layout_width="120dp"
+        android:layout_width="180dp"
         android:layout_height="120dp"
         android:layout_marginTop="15dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/device_recycler_view"
-        app:lottie_rawRes="@raw/bluetooth_lotti"
+        app:lottie_rawRes="@raw/purple_monkey_zoom_lotti"
         app:lottie_autoPlay="false"
-        app:lottie_repeatCount="2"
+        app:lottie_repeatCount="9"
         app:lottie_loop="true"
         tools:ignore="MissingClass">
     </com.airbnb.lottie.LottieAnimationView>

@@ -13,11 +13,11 @@ class MainViewModel: ViewModel() {
     private val _test:  MutableLiveData<String> = MutableLiveData()
     val test: LiveData<String> get() = _test
 
-
     fun updateData(data: ProtocolData) {
         Log.e("choco", "${data.toString()}")
         _data.postValue(data)
         Log.e("choco", "_data의 값은 : ${_data.value.toString()}")
     }
+
 
 }
