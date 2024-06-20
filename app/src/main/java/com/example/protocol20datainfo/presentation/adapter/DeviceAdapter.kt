@@ -64,6 +64,7 @@ class DeviceAdapter(
 //        Log.d("choco5732", "updateUI 밖 : ${deviceList[findPosition].toString()}")
 //        notifyDataSetChanged()
 //    }
+
     fun updateUiForConnect(mac: String) {
         Log.d("choco5732", "받은 mac은 : $mac")
         var findPosition = 0
@@ -73,17 +74,15 @@ class DeviceAdapter(
                 Log.d("choco5732", "updateUI 안 : ${deviceList[i].toString()}")
             }
         }
-
             deviceList[findPosition].isConnect = true
             Log.d("choco5732", "updateUI 밖 : ${deviceList[findPosition].toString()}")
             notifyDataSetChanged()
-
     }
 
 
     fun updateUiForDisconnect(mac: String) {
         var findPosition = 0
-        for (i in 0 until deviceList.size){
+        for (i in 0 until deviceList.size) {
             if (deviceList[i].deviceMac == mac) {
                 findPosition = i
                 break
@@ -92,9 +91,8 @@ class DeviceAdapter(
         deviceList[findPosition].isConnect = false
         notifyDataSetChanged()
     }
-
-
 }
+
 class DeviceViewHolder(
     val binding: DeviceItemBinding,
     private val onClickItem: (Int, Device) -> Unit,
@@ -119,6 +117,7 @@ class DeviceViewHolder(
                 item
             )
         }
+
         binding.root.setOnLongClickListener {
             onLongClickItem(
                 position,

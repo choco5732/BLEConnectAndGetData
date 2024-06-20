@@ -6,7 +6,9 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnticipateInterpolator
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.graphics.Color
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.protocol20datainfo.R
@@ -59,19 +61,28 @@ class MainActivity : AppCompatActivity() {
         viewPager.isUserInputEnabled = false // 옆으로 스크롤해서 탭 이동하는걸 끄는 기능
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.setIcon(viewPagerAdapter.getIcon(position))
+            tab.setText(viewPagerAdapter.getTitle(position))
         }.attach()
 
+        for (i in 0 .. tabLayout.tabCount) {
+            val params = tabLayout.getTabAt(i)?.view?.getChildAt(0)?.layoutParams as LinearLayout.LayoutParams?
+            params?.bottomMargin = 0
+            tabLayout.getTabAt(i)?.view?.getChildAt(0)?.layoutParams = params
+        }
+
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            @SuppressLint("ResourceAsColor")
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 changeTabIconColorPressed(tab)
+                reduceTabLayoutMargin()
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
                 changeTabIconColorUnpressed(tab)
+                reduceTabLayoutMargin()
             }
 
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-            }
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
 
         // 스플래쉬 API 애니메이션 설정
@@ -117,6 +128,14 @@ class MainActivity : AppCompatActivity() {
             1 -> {
                 tab.setIcon(R.drawable.ic_receive_pressed)
             }
+        }
+    }
+
+    private fun reduceTabLayoutMargin() {
+        for (i in 0 .. binding.tabLayout.tabCount) {
+            val params = binding.tabLayout.getTabAt(i)?.view?.getChildAt(0)?.layoutParams as LinearLayout.LayoutParams?
+            params?.bottomMargin = 0
+            binding.tabLayout.getTabAt(i)?.view?.getChildAt(0)?.layoutParams = params
         }
     }
 }

@@ -771,12 +771,16 @@ class BleListFragment : Fragment() {
         val we2a = data[21]
         val we2b = data[22]
         val we2c = data[23]
-        Log.e("data", "WEO 1 Address : $we1a : $we1b : $we1c")
-        Log.e("data", "WEO 2 Address : $we2a : $we2b : $we2c")
 
         val weo1 = converter(we1a, we1b, we1c)
         val weo2 = converter(we2a, we2b, we2c)
 
+
+        val findBufferWeoCount: Int = (data.size - 18) / 6
+            for (i in 0 until findBufferWeoCount) {
+                    Log.d("data", "weo1 : " + converter(data[18 + i * 6 + 0], data[18 + i * 6 + 1], data[18 + i * 6 + 2]) + " $findBufferWeoCount")
+                    Log.d("data", "weo2 : " + converter(data[18 + i * 6 + 3], data[18 + i * 6 + 4], data[18 + i * 6 + 5] ) + " $findBufferWeoCount")
+                }
 
 
         val finalData = ProtocolData(
@@ -794,23 +798,23 @@ class BleListFragment : Fragment() {
     }
 
     private fun converter(we1a: Byte, we1b: Byte, we1c: Byte): String {
-        Log.d("data", "we1a : ${we1a}, we1a converted : ${Integer.toBinaryString(we1a.toInt())}")
-        Log.d("data", "we1b : ${we1b}, we1b converted : ${Integer.toBinaryString(we1b.toInt())}")
-        Log.d("data", "we1b pad : ${Integer.toBinaryString(we1b.toInt()).padStart(8, '0')}")
-        Log.d("data", "we1c : ${we1c}, we1c converted : ${Integer.toBinaryString(we1c.toInt())}")
+//        Log.d("data", "we1a : ${we1a}, we1a converted : ${Integer.toBinaryString(we1a.toInt())}")
+//        Log.d("data", "we1b : ${we1b}, we1b converted : ${Integer.toBinaryString(we1b.toInt())}")
+//        Log.d("data", "we1b pad : ${Integer.toBinaryString(we1b.toInt()).padStart(8, '0')}")
+//        Log.d("data", "we1c : ${we1c}, we1c converted : ${Integer.toBinaryString(we1c.toInt())}")
         val test = Integer.toBinaryString(we1a.toInt())
         val paddedTest = test.padStart(8, '0')
         val test2 = Integer.toBinaryString(we1b.toInt())
         val paddedTest2 = test2.padStart(8, '0')
-        Log.d("data", "weo1 : ${we1c}, we1a + we1b : ${test + test2}")
-        Log.d("data", "weo1 pad : ${we1c}, we1a + we1b : ${paddedTest + paddedTest2}")
+//        Log.d("data", "weo1 : ${we1c}, we1a + we1b : ${test + test2}")
+//        Log.d("data", "weo1 pad : ${we1c}, we1a + we1b : ${paddedTest + paddedTest2}")
 
         val jisu = (paddedTest + paddedTest2).drop(1)
-        Log.d("data", "jisu : $jisu")
+//        Log.d("data", "jisu : $jisu")
         val convertedJisu = jisu.toInt(radix = 2)
-        Log.d("data", "converted jisu : $convertedJisu")
+//        Log.d("data", "converted jisu : $convertedJisu")
         val result = "$convertedJisu.$we1c"
-        Log.d("data", "result = $result")
+//        Log.d("data", "result = $result")
         return result
     }
 }
