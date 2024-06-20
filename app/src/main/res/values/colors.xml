@@ -9,5 +9,6 @@
     <color name="black2">#000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="uxn_logo_white">#FEFEFE</color>
-    <color name="color_any">#DBD6E1</color>
+    <color name="agms_purple_200">#DBD6E1</color>
+    <color name="grey">#969EA1</color>
 </resources>

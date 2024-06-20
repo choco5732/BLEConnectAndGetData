@@ -20,12 +20,12 @@
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:maxLines="3"
         android:text="기기명"
         android:textColor="@color/black"
         android:textSize="17sp"
         android:textStyle="bold"
-        android:maxLines="3"
-        android:layout_marginTop="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/bluetooth_img"
@@ -39,7 +39,6 @@
         android:text="기기 맥 어드레스"
         app:layout_constraintStart_toEndOf="@+id/bluetooth_img"
         app:layout_constraintTop_toBottomOf="@+id/device_name" />
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
